@@ -1,0 +1,84 @@
+{% extends "layout/users.html" %}
+
+
+{% block content %}
+
+{% include "users/includes/modalUpdateParticipation.html" %}
+
+<div class="container">
+
+    <div class="d-md-flex justify-content-between align-items-center">
+        <h1 class="titre" style="font-family: 'Gill Sans', sans-serif;
+            padding: 20px;
+            text-decoration: underline;
+            font-weight: bold;
+            color: white;">
+            RDV
+        </h1>
+    
+        <div class="d-flex align-items-start">
+            <a class="btn btn-primary btn-sm" href="{% url 'creer_rdv' %}"><b>+ </b>Ajouter un rendez-vous
+            </a>
+        </div>
+    </div>
+
+   <br>
+    
+
+    {% for rdv in rdvs %}
+    <div class="card text-bg-light mb-3">
+        <div class="card-header">
+            <div class="btn-group" role="group" aria-label="Basic outlined example">
+                <button class="btn btn-primary dropdown-toggle btn-sm" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#infos_{{ rdv.id }}" aria-expanded="false"
+                    aria-controls="collapseInfos">
+                    Infos
+                </button>
+                <button
+                    class="btn btn-primary dropdown-toggle btn-sm" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#participants_{{ rdv.id }}" aria-expanded="false" aria-controls="collapseParticipants">
+                    Participants
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" type="button"
+                hx-trigger="load, updateParticipant from:body"
+                hx-get="{% url 'htmx_getNombreParticipants' rdv.id %}" hx-swap="innerHTML">
+                    Nombre inscrits
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" type="button">
+                    Ajouter dans Calendrier
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="card-title">
+                <div class="d-md-flex justify-content-between align-items-center">
+                    {{ rdv.nom }}
+            
+                    <div class="d-flex align-items-start">
+                        {{ rdv.jour }}
+                    </div>
+                </div>
+            
+            </div>
+            <div id="infos_{{ rdv.id }}" class="collapse">
+            
+                <div class="d-md-flex justify-content-between align-items-center">
+                    lieu : {{ rdv.lieu }}
+            
+                    <div class="d-flex align-items-start">
+                        Début : {{ rdv.heure_debut }}
+                        Fin : {{ rdv.heure_fin }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <ol class="list-group collapse card" id="participants_{{ rdv.id }}" hx-get="{% url 'htmx_getParticipants' rdv.id %}" hx-trigger="load, updateParticipant from:body" hx-swap="innerHTML">
+            
+        </ol>
+    </div>
+   
+    {% endfor %}
+</div>
+
+{% endblock content %}

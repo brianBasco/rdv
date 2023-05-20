@@ -1,0 +1,40 @@
+{% extends "layout/users.html" %}
+
+{% block content %}
+
+<span class="navbar-text">
+  <a class="nav-link" aria-current="page" href="{% url 'logout' %}">Logout</a>
+</span>
+
+<section class="vh-100" style="background-color: #eee;">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-md-12 col-xl-4">
+  
+          <div class="card" style="border-radius: 15px;">
+            <div class="card-body text-center">
+               
+              
+              <h4 class="mb-2">Email : {{ request.user.email }}</h4>
+              <h4 class="mb-2">Username : {{ request.user.username }}</h4>
+              <h4 class="mb-2">First_name : {{ request.user.first_name }}</h4>
+             
+             
+                <a class="btn btn-outline-dark btn-sm"
+                href="{% url 'modifier_password' %}">Modifier password</a>
+              <div class="d-flex justify-content-between text-center mt-5 mb-2">
+                <div>
+                  <p class="mb-2 h5">8471</p>
+                  <p class="text-muted mb-0">Wallets Balance</p>
+                </div>
+               
+              </div>
+            </div>
+          </div>
+  
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock content %}

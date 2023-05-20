@@ -1,0 +1,104 @@
+{% extends "layout/users.html" %}
+
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="inner-modal_body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fin du Modal -->
+
+<div class="container">
+
+  <div class="d-md-flex justify-content-end">
+    <div class="mb-auto p-2">
+      <a class="btn btn-success" href="{% url 'creer_rdv' %}">Ajouter Rdv +</a>
+    </div>
+  </div>
+
+
+
+    <div class="accordion" id="accordionExample">
+        {% for object in liste_rdvs %}
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="heading{{object.rdv.id}}">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{object.rdv.id}}" aria-expanded="false" aria-controls="collapse{{object.rdv.id}}">
+                {{ object.rdv.nom }}
+            </button>
+          </h2>
+          <div id="collapse{{object.rdv.id}}" class="accordion-collapse collapse" aria-labelledby="heading{{object.rdv.id}}" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <p>
+                    <i>lieu : </i>{{ object.rdv.lieu }}
+                </p>
+                <p>
+                    <i>jour : </i>{{ object.rdv.jour }}
+                </p>
+                <p>
+                    <i>Début : </i>{{ object.rdv.heure_debut }}
+                </p>
+                <p>
+                    <i>Fin : </i>{{ object.rdv.heure_fin }}
+                </p>
+                <div class="btn-group">
+                    <a href="{% url 'modifier_rdv' object.rdv.id %}" class="btn btn-primary">Modifier</a>
+                    <a href="{% url 'supprimer_rdv' object.rdv.id %}" class="btn btn-primary">Supprimer</a>
+                    <a href="{% url 'ajouter_participant_rdv' object.rdv.id %}" class="btn btn-primary">Ajouter Partipant</a>
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#participants_{{ object.rdv.id }}" aria-expanded="false" aria-controls="collapseParticipants">
+                        Participants
+                    </button>
+                    <!-- Button trigger modal -->
+                    <button hx-post="{% url 'htmx_get_contacts' object.rdv.id %}"
+                    hx-trigger="click"
+                    hx-target="#inner-modal_body"
+                    hx-swap="innerHTML" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Launch demo modal
+                    </button>
+                    {% if not object.rdv.createur_participe %}
+                    <button class="btn btn-outline-primary" type="button">
+                        Participer!
+                    </button>
+                    {% endif %}
+                </div>
+                <div id="ajout-contact-results">
+                    
+                </div>
+
+                <ol class="list-group list-group-numbered collapse" id="participants_{{ object.rdv.id }}">
+                    {% for p in object.participants %}
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div class="ms-2 me-auto">
+                        <div class="fw-bold">{{ p.nom }}</div>
+                        {{ p.get_statut_display }}
+                      </div>
+                      <span class="btn btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                      </svg></span>
+                    </li>
+                    {% endfor %}
+                  </ol>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}

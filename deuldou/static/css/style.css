@@ -1,0 +1,12 @@
+body {
+	/*background-color: #002b44;
+	color: white; */
+}
+
+.titre {
+	font-family: "Gill Sans", sans-serif;
+	padding: 20px;
+	text-decoration: underline;
+	font-weight: bold;
+	color: white;
+}

@@ -1,0 +1,21 @@
+    {% for p in participants %}
+    <li class="list-group-item">
+        <div class="d-md-flex justify-content-between align-items-center">
+            {{ p.nom }}
+            {{ p.get_statut_display }}
+            {% if request.user.email == p.email %}
+            <div class="d-flex align-items-start">
+                <!-- Button trigger modal -->
+                <button hx-get="{% url 'htmx_updateParticipant' p.id %}"
+                hx-trigger="click"
+                hx-target="#ModalUpdateParticipationBody"
+                hx-swap="innerHTML"
+                type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#ModalUpdateParticipation">
+                    Modifier
+                </button>
+            </div>
+            {% endif%}
+        </div>
+    </li>
+    {% endfor %}
