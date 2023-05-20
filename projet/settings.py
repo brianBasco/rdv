@@ -36,7 +36,6 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'widget_tweaks',
-    'bootstrap5',
     'deuldou.apps.DeuldouConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -148,6 +147,6 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'bast620@gmail.com'
-EMAIL_HOST_PASSWORD = 'asimbonanga23'
+EMAIL_HOST_USER = 
+EMAIL_HOST_PASSWORD = 
 """
