@@ -3,3 +3,4 @@ manage.py
 *__pycache__*
 *bootstrap-5.0.2-dist*
 **/migrations
+.env
