@@ -179,7 +179,7 @@ class ParticipantService():
             - Envoyer mail d'info comme nouvelle participation
         """
         try:
-            participant: Participant = Participant(email=email, nom=nom, rdv=rdv, statut=Participant.VIDE)
+            participant: Participant = Participant(email=email, nom=nom, rdv=rdv)#, statut=Participant.VIDE)
             participant.validate_constraints(exclude=None)
         except ValidationError as error:
             raise error

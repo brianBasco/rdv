@@ -40,11 +40,24 @@ class HTMXParticipantForm(forms.ModelForm):
         fields = ["nom","statut"]
         #widgets = {'rdv': forms.HiddenInput()}
 
+"""
 class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
         fields = "__all__"
         widgets = {'user': forms.HiddenInput()}
+
+"""
+
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        #fields = "__all__"
+        exclude = ["user"]
+        #widgets = {'user': forms.HiddenInput()}
+
+
+
 
 class Liste_contactsForm(forms.ModelForm):
     class Meta:

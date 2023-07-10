@@ -159,19 +159,24 @@ class Participant(models.Model):
     ABSENT = "AB"
     RETARD = "RE"
     INCERTAIN = "IN"
-    VIDE = "VI"
+    PISCINE = "PI"
+    VITE_FAIT = "VI"
+    NON_INSCRIT = "NI"
     STATUTS_CHOICES = [
         (PRESENT, "Présent"),
         (ABSENT, "Absent"),
         (RETARD, "En retard"),
         (INCERTAIN, "Incertain"),
+        (PISCINE,"Peux pas j'ai piscine"),
+        (VITE_FAIT, "Je passe pour dire bonjour"),
+        (NON_INSCRIT, "Non inscrit")
     ]
     """ ------------ Obligatoire-------- """
     rdv = models.ForeignKey(Deuldou, on_delete=models.CASCADE, related_name='participants')
     email = models.EmailField(max_length=100, blank=False)
     nom = models.CharField(max_length=150, blank=False)
     """ ------------ Facultatif-------- """
-    statut = models.CharField(max_length=2,choices=STATUTS_CHOICES,default=(VIDE, "Non inscrit"))
+    statut = models.CharField(max_length=2,choices=STATUTS_CHOICES,default=NON_INSCRIT)#, "Non inscrit"))
     visible = models.BooleanField(default=True)
     commentaire = models.TextField(null=True, blank=True)
     #tags = models.ManyToManyField(Tag)
@@ -212,7 +217,7 @@ class Contact(models.Model):
         """
         if self.user.email == self.email :
             #raise ValidationError("Vous ne pouvez pas vous ajouter")
-            raise ValidationError({"email": "Vous ne pouvez pas ajouter comme Contact"})
+            raise ValidationError({"email": "Vous ne pouvez pas vous ajouter comme Contact"})
         
         
     """

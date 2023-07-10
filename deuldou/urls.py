@@ -23,8 +23,10 @@ urlpatterns = [
 
     path('test', views.test, name="test"),
     path('test_download', views.test_download, name="test_download"),
-    path('htmx_get_contacts/<int:id_rdv>', views.htmx_get_contacts, name="htmx_get_contacts"),
-    path('htmx_add_contact/<int:id_rdv>/<int:id_contact>', views.htmx_add_contact, name="htmx_add_contact"),
+    #path('htmx_get_contacts/<int:id_rdv>', views.htmx_get_contacts, name="htmx_get_contacts"),
+    #path('htmx_add_contact/<int:id_rdv>/<int:id_contact>', views.htmx_add_contact, name="htmx_add_contact"),
+    path('htmx_getContacts', views.htmx_getContacts, name="htmx_getContacts"),
+    path('htmx_addContact', views.htmx_addContact, name="htmx_addContact"),
     
     
 

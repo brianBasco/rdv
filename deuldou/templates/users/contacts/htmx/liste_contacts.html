@@ -1,0 +1,16 @@
+{% for contact in contacts %}
+    <div class="card">
+        <div class="card-body">
+            <p>
+                {{ contact.nom }}
+            </p>
+            <p>
+                {{ contact.email }}
+            </p>
+        </div>
+    </div>
+    {% empty %}
+    <div class="container">
+        <div class="form-text">Vous n'avez pas créé de contact</div>
+    </div>
+    {% endfor %}

@@ -25,21 +25,31 @@
 
 <div class="container">
 
-  <div class="d-md-flex justify-content-end">
-    <div class="mb-auto p-2">
-      <a class="btn btn-success" href="{% url 'creer_rdv' %}">Ajouter Rdv +</a>
-    </div>
+  <div class="container py-4">
+    <h1>Gestion de vos Rdv!</h1>
+</div>
+
+  <div class="container mb-3">
+    <p>Sur cette page vous pouvez créer, modifier, supprimer les Rdv que vous avez créés</p>
+    <p>Vous pouvez modifier également les participants à vos Rdv, en ajouter ou en supprimer</p>
+    <p>Notez cependant que vous ne pouvez pas modifier la participation de vos invités (vous ne pouvez pas mettre un partcipant Présent comme Absent par exemple)</p>
   </div>
 
+    <div class="mb-3 d-flex justify-content-end">
+        <a class="btn btn-primary btn-sm" href="{% url 'creer_rdv' %}"><b>+ </b>Ajouter un rendez-vous</a>
+    </div>
 
 
     <div class="accordion" id="accordionExample">
         {% for object in liste_rdvs %}
         <div class="accordion-item">
           <h2 class="accordion-header" id="heading{{object.rdv.id}}">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{object.rdv.id}}" aria-expanded="false" aria-controls="collapse{{object.rdv.id}}">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{object.rdv.id}}" aria-expanded="false" aria-controls="collapse{{object.rdv.id}}">
                 {{ object.rdv.nom }}
             </button>
+           
+            
+           
           </h2>
           <div id="collapse{{object.rdv.id}}" class="accordion-collapse collapse" aria-labelledby="heading{{object.rdv.id}}" data-bs-parent="#accordionExample">
             <div class="accordion-body">
@@ -56,25 +66,31 @@
                     <i>Fin : </i>{{ object.rdv.heure_fin }}
                 </p>
                 <div class="btn-group">
-                    <a href="{% url 'modifier_rdv' object.rdv.id %}" class="btn btn-primary">Modifier</a>
-                    <a href="{% url 'supprimer_rdv' object.rdv.id %}" class="btn btn-primary">Supprimer</a>
-                    <a href="{% url 'ajouter_participant_rdv' object.rdv.id %}" class="btn btn-primary">Ajouter Partipant</a>
+                  <a href="{% url 'modifier_rdv' object.rdv.id %}" class="btn btn-primary"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+                    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+                    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+                  </svg></a>
+                    <a href="{% url 'ajouter_participant_rdv' object.rdv.id %}" class="btn btn-primary">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-add" viewBox="0 0 16 16">
+                        <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0Zm-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                        <path d="M8.256 14a4.474 4.474 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10c.26 0 .507.009.74.025.226-.341.496-.65.804-.918C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4s1 1 1 1h5.256Z"/>
+                      </svg>
+                    </a>
                     <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="collapse"
                         data-bs-target="#participants_{{ object.rdv.id }}" aria-expanded="false" aria-controls="collapseParticipants">
-                        Participants
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                          <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                          <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                        </svg>
                     </button>
                     <!-- Button trigger modal -->
                     <button hx-post="{% url 'htmx_get_contacts' object.rdv.id %}"
                     hx-trigger="click"
                     hx-target="#inner-modal_body"
                     hx-swap="innerHTML" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        Launch demo modal
+                        demo modal
                     </button>
-                    {% if not object.rdv.createur_participe %}
-                    <button class="btn btn-outline-primary" type="button">
-                        Participer!
-                    </button>
-                    {% endif %}
+                    
                 </div>
                 <div id="ajout-contact-results">
                     
@@ -97,8 +113,13 @@
             </div>
           </div>
         </div>
+        {% empty %}
+    <div class="container">
+        Vous n'avez pas encore créé de Rdv!
+    </div>
         {% endfor %}
     </div>
 </div>
+
 
 {% endblock content %}

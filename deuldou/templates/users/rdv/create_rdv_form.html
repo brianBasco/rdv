@@ -3,6 +3,11 @@
 
 {% block content %}
 
+<div class="container my-3">
+    <p class="text-center h1 fw-bold">Création d'un Rdv!</p>
+    <div class="form-text">Les champs marqués d'une étoile <b>(*)</b> sont obligatoires</div>
+  </div>
+
 <div class="container">
 
 
@@ -36,7 +41,7 @@
         <div class="mb-3">
             <label class="form-label" for="{{ form.lieu.id_for_label }}">Lieu</label>
             <span><b>*</b></span>
-            {{ form.lieu|add_class:"form-control" }}
+            {{ form.lieu|add_class:"form-control"|attr:"rows:3" }}
         </div>
         <div class="mb-3 form-check">
             <label class="form-check-label" for="createur_participe">Vous participez ?</label>

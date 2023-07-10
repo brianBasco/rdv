@@ -2,26 +2,39 @@
 
 {% block content %}
 
+<!-- Modal -->
+<div class="modal fade" id="ModalAddContact" tabindex="-1" aria-labelledby="ModalAddContact" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="ModalAddContactContent">
+    ...
+    </div>
+  </div>
+</div>
+  <!-- Fin du Modal -->
+
+<div class="container my-3">
+    <p class="text-center h1 fw-bold">Gérer vos contacts</p>
+    <div class="form-text">Vous pouvez ajouter des contacts ou créer des listes. Vous pouvez ajouter vos contacts dans vos listes</div>
+  </div>
+
 <div class="container">
     <div class="btn-group">
         <a class="btn btn-outline-secondary" href="{% url 'add_contact' %}">Ajouter contact +</a>
         <a class="btn btn-outline-secondary" href="{% url 'add_liste_contact' %}">Ajouter Liste +</a>
-      </div>
+        
+        <!-- Button trigger modal -->
+        <button hx-get="{% url 'htmx_addContact' %}"
+        hx-trigger="click"
+        hx-target="#ModalAddContactContent"
+        hx-swap="innerHTML"
+        type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAddContact">
+            Ajouter contact +
+        </button>
+    </div>
 </div>
 
-<div class="container">
-    {% for contact in contacts %}
-    <div class="card">
-        <div class="card-body">
-            <p>
-                {{ contact.nom }}
-            </p>
-            <p>
-                {{ contact.email }}
-            </p>
-        </div>
-    </div>
-    {% endfor %}
+<div class="container" hx-get="{% url 'htmx_getContacts' %}" hx-trigger="load, addContact from:body" hx-swap="innerHTML">
+   ...
 </div>
 
 {% endblock content %}
