@@ -2,6 +2,16 @@
 
 {% block content %}
 
+<div id="messages" hx-swap-oob="true" hx-swap="innerHTML">
+  {% if messages %}
+{% for message in messages %}
+<div class="alert {% if message.tags %} {{ message.tags }} {% endif %}" role="alert">
+{{ message }}
+</div>
+{% endfor %}
+{% endif %}
+</div>
+
 <!-- Modal -->
 <div class="modal fade" id="ModalAddContact" tabindex="-1" aria-labelledby="ModalAddContact" aria-hidden="true">
   <div class="modal-dialog">
@@ -12,6 +22,28 @@
 </div>
   <!-- Fin du Modal -->
 
+
+
+<!-- Navigation par tabs -->
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="#">Active</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">Link</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">Link</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link disabled">Disabled</a>
+  </li>
+</ul>
+
+<!-- FIn de la navigation par tabs-->
+
+
+
 <div class="container my-3">
     <p class="text-center h1 fw-bold">Gérer vos contacts</p>
     <div class="form-text">Vous pouvez ajouter des contacts ou créer des listes. Vous pouvez ajouter vos contacts dans vos listes</div>
@@ -19,10 +51,12 @@
 
 <div class="container">
     <div class="btn-group">
-        <a class="btn btn-outline-secondary" href="{% url 'add_contact' %}">Ajouter contact +</a>
         <a class="btn btn-outline-secondary" href="{% url 'add_liste_contact' %}">Ajouter Liste +</a>
         
-        <!-- Button trigger modal -->
+        <!-- Button trigger modal
+        {% comment "ce bouton permet d'appeler le Modal et d'afficher soit Contact Empty ou existant" %}
+        {% endcomment %}
+        -->
         <button hx-get="{% url 'htmx_addContact' %}"
         hx-trigger="click"
         hx-target="#ModalAddContactContent"
@@ -33,8 +67,35 @@
     </div>
 </div>
 
+{% comment "v1 de htmx get contacts" %}
 <div class="container" hx-get="{% url 'htmx_getContacts' %}" hx-trigger="load, addContact from:body" hx-swap="innerHTML">
-   ...
+  ...
 </div>
+{% endcomment %}
+
+ 
+{% comment "note sur traitement Htmx" %}
+Sur le trigger htmx :addContact, appelle url contacts et ne retourne que la div id=liste_contacts.
+Ceci évite d'écrire une nouvelle fonction htmx dans les views et de disséminer la vue avec des partials
+{% endcomment %}
+<div id="liste_contacts" class="container" hx-get="{% url 'contacts' %}" hx-trigger="addContact from:body" hx-swap="outerHTML" hx-select="#liste_contacts">
+  {% for contact in contacts %}
+  <div class="card">
+      <div class="card-body">
+          <p>
+              {{ contact.nom }}
+          </p>
+          <p>
+              {{ contact.email }}
+          </p>
+      </div>
+  </div>
+  {% empty %}
+  <div class="container">
+      <div class="form-text">Vous n'avez pas créé de contact</div>
+  </div>
+  {% endfor %}
+</div>
+
 
 {% endblock content %}

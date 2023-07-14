@@ -9,20 +9,19 @@
 {% include "layout/navigation/navigation.html" %}
 
 {% if messages %}
-
+<div id="messages">
 {% for message in messages %}
 <div class="alert {% if message.tags %} {{ message.tags }} {% endif %}" role="alert">
 {{ message }}
 </div>
-
 {% endfor %}
-
+</div>
 {% endif %}
+
 {% endblock navigation %}
 
 
 {% block content %}
-
 
 
 {% endblock content %}

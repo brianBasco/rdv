@@ -219,7 +219,6 @@ class Contact(models.Model):
             #raise ValidationError("Vous ne pouvez pas vous ajouter")
             raise ValidationError({"email": "Vous ne pouvez pas vous ajouter comme Contact"})
         
-        
     """
     Contrainte unique sur les clés USER et EMAIL    
     """

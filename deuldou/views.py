@@ -263,43 +263,8 @@ def htmx_getNombreParticipants(request: HttpRequest, id_rdv: int):
     return HttpResponse("{} {}".format(str(nbparticipants), inscrits))
 
 
-@login_required
-def htmx_getContacts(request: HttpRequest):
-    if request.method == "GET":
-        user:User = request.user
-        contacts: list[Contact] = user.contacts.all()
-        return render(request, "users/contacts/htmx/liste_contacts.html", {'contacts': contacts})
 
-@login_required
-def htmx_addContact(request: HttpRequest):
-    """
-    Ajoute le contact au User (User basé sur la session) et retourne le signal pour MAJ Htmx
-    """
-    user: User = request.user
-    if request.method == "GET":
-        #form: ContactForm = ContactForm(initial={'user': user})
-        form: ContactForm = ContactForm()
-        return render(request, "users/contacts/htmx/contactForm.html", {'form': form})
-    if request.method == "POST":
-        contact: Contact = Contact(user=request.user)
-        form: ContactForm = ContactForm(request.POST, instance=contact)
-        if form.is_valid():
-            try:
-                form.save()
-                messages.add_message(request, messages.SUCCESS, "Le contact a été ajouté")
-            except:
-                messages.add_message(request, messages.ERROR, "Le contact n'a pas été ajouté")
-        else:
-            # A faire : récupérer les erreurs du formulaire
-            for message in form.errors.values():
-                messages.add_message(request, messages.ERROR, message)
-        return contacts_view(request)
         
-        #response: HttpResponse = HttpResponse("Le contact a été ajouté")
-        #response.headers["HX-Trigger"] = "addContact"
-        #return response
-
-
 
 """
 def creer_hashtag(request):
@@ -324,9 +289,12 @@ def filtrer_par_hashtag(request):
 
 @login_required
 def contacts_view(request: HttpRequest):
-    contacts = ContactService.get_Contacts(request.user)
+    #contacts = ContactService.get_Contacts(request.user)
+    user:User = request.user
+    contacts: list[Contact] = user.contacts.all()
     return render(request, "users/contacts/index.html", {'contacts': contacts})
 
+"""
 @login_required
 def add_contact_view(request: HttpRequest):
     if request.method == "POST":
@@ -342,6 +310,8 @@ def add_contact_view(request: HttpRequest):
 
     form = ContactForm(instance=Contact(user=request.user))
     return render(request, "users/contacts/add.html", {'form': form})
+"""
+
 
 @login_required
 def add_liste_contact_view(request: HttpRequest):
@@ -358,6 +328,43 @@ def add_liste_contact_view(request: HttpRequest):
 
     form = Liste_contactsForm(instance=Liste_contacts(user=request.user))
     return render(request, "users/liste_contacts/add.html", {'form': form})
+
+"""
+@login_required
+def htmx_getContacts(request: HttpRequest):
+    if request.method == "GET":
+        user:User = request.user
+        contacts: list[Contact] = user.contacts.all()
+        return render(request, "users/contacts/htmx/liste_contacts.html", {'contacts': contacts})
+"""
+
+@login_required
+def htmx_addContact(request: HttpRequest):
+    """
+    Ajoute le contact au User (User basé sur la session) et retourne le signal pour MAJ Htmx
+    """
+    user: User = request.user
+    if request.method == "GET":
+        #form: ContactForm = ContactForm(initial={'user': user})
+        form: ContactForm = ContactForm()
+        return render(request, "users/contacts/htmx/contactForm.html", {'form': form})
+    if request.method == "POST":
+        contact: Contact = Contact(user=request.user)
+        form: ContactForm = ContactForm(request.POST, instance=contact)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Le contact a été ajouté")
+
+        else:
+            #print(form.errors)
+            # A faire : récupérer les erreurs du formulaire
+            messages.add_message(request, messages.ERROR, "vous ne pouvez pas enregistrer cet utilisateur !")
+        #return redirect('contacts')
+        response = HttpResponse()
+        response.headers["HX-Trigger"] = "addContact"
+        return response
+
+
 
 # ------------------- Vues de gestion des RDV  ---------------------
 
@@ -382,12 +389,13 @@ def htmx_get_contacts(request: HttpRequest, id_rdv: int):
         contacts = Contact.objects.filter(user=request.user).exclude(email__in=emails)
         print(contacts)
         return render(request, "users/rdv/htmx/contacts.html", {'items': contacts, 'id_rdv': id_rdv})
-    
+
+"""
 def htmx_add_contact(request: HttpRequest, id_rdv: int, id_contact: int):
-    """
+    '''
     Ajouter le contact comme participant\n
     Retourner les contacts qui ne participent pas encore à ce RDV
-    """
+    '''
     if request.method == 'POST':
         contact = get_object_or_404(Contact, pk=id_contact)
         rdv = get_object_or_404(Deuldou, pk=id_rdv)
@@ -396,6 +404,9 @@ def htmx_add_contact(request: HttpRequest, id_rdv: int, id_contact: int):
         except:
             return HttpResponse("Une erreur est survenue lors de l'ajout du Contact")
         return htmx_get_contacts(request,id_rdv)
+
+"""   
+
 
 @login_required
 def modifier_rdv(request: HttpRequest, id: int):

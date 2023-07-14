@@ -17,7 +17,7 @@ urlpatterns = [
     path('profil', views.profil_view, name="profil"),
 
     path('contacts', views.contacts_view, name="contacts"),
-    path('add_contact', views.add_contact_view, name="add_contact"),
+    #path('add_contact', views.add_contact_view, name="add_contact"),
     path('add_liste_contact', views.add_liste_contact_view, name="add_liste_contact"),
     
 
@@ -25,7 +25,7 @@ urlpatterns = [
     path('test_download', views.test_download, name="test_download"),
     #path('htmx_get_contacts/<int:id_rdv>', views.htmx_get_contacts, name="htmx_get_contacts"),
     #path('htmx_add_contact/<int:id_rdv>/<int:id_contact>', views.htmx_add_contact, name="htmx_add_contact"),
-    path('htmx_getContacts', views.htmx_getContacts, name="htmx_getContacts"),
+    #path('htmx_getContacts', views.htmx_getContacts, name="htmx_getContacts"),
     path('htmx_addContact', views.htmx_addContact, name="htmx_addContact"),
     
     

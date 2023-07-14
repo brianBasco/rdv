@@ -56,6 +56,12 @@ class ContactForm(forms.ModelForm):
         exclude = ["user"]
         #widgets = {'user': forms.HiddenInput()}
 
+    # Override de la méthode pour form.is_valid() -> prendre en compte contrainte Unique sur User
+    def _get_validation_exclusions(self):
+        exclude = super(ContactForm, self)._get_validation_exclusions()
+        exclude.remove('user')
+        return exclude
+
 
 
 

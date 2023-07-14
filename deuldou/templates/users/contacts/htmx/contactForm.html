@@ -1,5 +1,5 @@
-<!-- <form hx-post="{% url 'htmx_addContact' %}"> -->
-    <form action="{% url 'htmx_addContact' %}" method="POST">
+ <form hx-post="{% url 'htmx_addContact' %}">
+<!-- <form action="{% url 'htmx_addContact' %}" method="POST"> -->
     {% csrf_token %}
     {% load widget_tweaks %}
 
