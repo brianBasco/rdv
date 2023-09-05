@@ -8,7 +8,7 @@
                 <!-- Button trigger modal -->
                 <button hx-get="{% url 'htmx_updateParticipant' p.id %}"
                 hx-trigger="click"
-                hx-target="#ModalUpdateParticipationBody"
+                hx-target="#ModalUpdateParticipationContent"
                 hx-swap="innerHTML"
                 type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
                     data-bs-target="#ModalUpdateParticipation">

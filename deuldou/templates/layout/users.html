@@ -6,17 +6,70 @@
 
 {% block navigation %}
 
-{% include "layout/navigation/navigation.html" %}
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid d-flex">
+        
+        <span class="navbar-brand mb-0 h1">Logo</span>
 
-{% if messages %}
+
+          <nav class="nav">
+              <a class="nav-link active" aria-current="page" href="{% url 'home' %}">RDV!</a>
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Options
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'gerer_rdvs' %}">Gérer ses Rendez-vous</a></li>
+                <li><a class="dropdown-item" href="{% url 'contacts' %}">Contacts</a></li>
+                <li><a class="dropdown-item" href="{% url 'test_download' %}">Télécharger ics</a></li>
+              </ul>
+            </li>
+          </nav>
+
+
+            {% if user.is_authenticated %}
+
+            
+            <span class="navbar-text ms-auto">
+                <a class="nav-link" aria-current="page" href="{% url 'profil' %}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                  </svg></a>
+            </span>
+        
+    </div>
+   
+    
+    {% endif %}
+</nav>
+
+
+
 <div id="messages">
+{% if messages %}
 {% for message in messages %}
-<div class="alert {% if message.tags %} {{ message.tags }} {% endif %}" role="alert">
+<div class="alert {% if message.tags %} {{ message.tags }} {% endif %} alert-dismissible fade show" role="alert" style="margin:0 auto;top: 10px;width: 95%;">
+  {% if message.tags == 'alert-success' %}
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+  </svg>
+  {% elif message.tags == 'alert-danger' %}
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill" viewBox="0 0 16 16">
+    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+  </svg>
+  {% endif %}
 {{ message }}
+<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" data-bs-theme="dark"></button>
 </div>
 {% endfor %}
-</div>
 {% endif %}
+</div>
+
+<!--  Partials infos  -->
+<div id="feedback" style="width: 50%;position: fixed;bottom: 10px;right: 10px;z-index: 999;">
+  {% include "layout/partials/infos.html" %}
+</div>
+<!--  Fin du Partials info  -->
 
 {% endblock navigation %}
 

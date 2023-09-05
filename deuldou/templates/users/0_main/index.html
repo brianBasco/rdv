@@ -3,7 +3,37 @@
 
 {% block content %}
 
-{% include "users/includes/modalUpdateParticipation.html" %}
+<!-- Modal 
+<div class="modal fade" id="ModalUpdateParticipation" tabindex="-1" aria-labelledby="ModalUpdateParticipation" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="ModalUpdateParticipationLabel">Modifier</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="ModalUpdateParticipationBody">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+-->
+
+
+<!-- Modal -->
+<div class="modal fade" id="ModalUpdateParticipation" tabindex="-1" aria-labelledby="ModalUpdateParticipation" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content" id="ModalUpdateParticipationContent">
+      ...
+      </div>
+    </div>
+  </div>
+  <!-- Fin du Modal -->
+
 
 <div class="container">
 
@@ -64,9 +94,10 @@
             </div>
         </div>
         
-        <ol class="list-group collapse card" id="participants_{{ rdv.id }}" hx-get="{% url 'htmx_getParticipants' rdv.id %}" hx-trigger="load, updateParticipant from:body" hx-swap="innerHTML">
+        <ol class="list-group collapse card" id="participants_{{ rdv.id }}" hx-get="{% url 'htmx_getParticipants' rdv.id %}" hx-trigger="load, updateParticipants_{{ rdv.id }} from:body" hx-swap="innerHTML">
             
         </ol>
+
     </div>
     {% empty %}
     <div class="container">

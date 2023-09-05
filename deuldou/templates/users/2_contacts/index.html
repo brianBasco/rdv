@@ -2,16 +2,6 @@
 
 {% block content %}
 
-<div id="messages" hx-swap-oob="true" hx-swap="innerHTML">
-  {% if messages %}
-{% for message in messages %}
-<div class="alert {% if message.tags %} {{ message.tags }} {% endif %}" role="alert">
-{{ message }}
-</div>
-{% endfor %}
-{% endif %}
-</div>
-
 <!-- Modal -->
 <div class="modal fade" id="ModalAddContact" tabindex="-1" aria-labelledby="ModalAddContact" aria-hidden="true">
   <div class="modal-dialog">

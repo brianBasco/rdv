@@ -1,17 +1,15 @@
-{% extends "layout/users.html" %}
+{# Display a form #}
 
+{% if form.errors %}
+{% for field in form %}
+{% for error in field.errors %}
+<div class="alert alert-danger">
+    <strong>{{ error|escape }}</strong>
+</div>
+{% endfor %}
+{% endfor %}
+{% endif %}
 
-{% block content %}
-
-<div class="container my-3">
-    <p class="text-center h1 fw-bold">Création d'un Rdv!</p>
-    <div class="form-text">Les champs marqués d'une étoile <b>(*)</b> sont obligatoires</div>
-  </div>
-
-<div class="container">
-
-
-    {# Display a form #}
     <form method="POST" class="form p-2" action="{% url 'creer_rdv' %}">
         {% csrf_token %}
         {% load widget_tweaks %}
@@ -45,16 +43,10 @@
         </div>
         <div class="mb-3 form-check">
             <label class="form-check-label" for="createur_participe">Vous participez ?</label>
-            {{ form.createur_participe|add_class:"form-check-input" }}
+            <input type="checkbox" class="form-check-input" id="createur_participe" name="createur_participe" checked>
         </div>
-
 
         <button type="submit" class="btn btn-primary">Créer RDV</button>
 
 
     </form>
-
-
-</div>
-
-{% endblock content %}

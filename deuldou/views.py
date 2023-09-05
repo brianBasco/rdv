@@ -1,4 +1,5 @@
 
+import json
 from datetime import datetime
 
 import pytz
@@ -19,17 +20,22 @@ from ics import Calendar as Cal
 from ics import Event as Ev
 from pwgen import pwgen
 
-from .forms import (Add_Participant_Form, ContactForm, Create_Rdv_Form,
-                    HTMXParticipantForm, Liste_contactsForm, ParticipantForm)
+from .forms import (Add_Participant_Form, ContactForm, HTMXParticipantForm,
+                    Liste_contactsForm, ParticipantForm, RdvForm)
 from .models import (Contact, Deuldou, Invite, Liste_contacts, Participant,
                      Tag, User)
-from .services import (ContactService, DeuldouService, ParticipantService,
-                       UserService)
 
 # ------------------- Paramètres de config -----------------------
 
 ERREUR = "Une erreur est survenue..."
 PERMISSION = "Permission non accordée"
+TEMPLATE_INFOS = "layout/partials/infos.html"
+
+#Pages :
+MAIN = 'users/0_main'
+GESTION_RDV = 'users/1_gestion_rdv'
+CONTACTS = 'users/2_contacts'
+PROFIL = 'users/3_profil'
 
 # ------------------- Create your views here ---------------------
 
@@ -62,10 +68,28 @@ def test_download(request):
     f1 = ContentFile(cal.to_ical())
     response = HttpResponse(f1,headers={"Content-Type": "text/calendar","Content-Disposition": 'attachment; filename="foo.ics"',},)
     return response
+
+def test_index(request):
+    return render(request, 'TEST/test.html')
+
+def test_oob(request):
+    context = {}
+    context['results'] = ["un", "deux", "trois"]
+    context['success'] = {"OK !", "ça fonctione !"}
+    context['errors'] = {"Erreur !"}
+    return render(request, 'TEST/partial.html', context=context)
         
 
 # ------------------- Fin des vues de test ---------------------
 
+
+# ------------------- Vues des components ---------------------
+def rdv_template(request: HttpRequest):
+    form: RdvForm = RdvForm()
+    return render(request,"components/RdvForm.html", {"form": form})
+
+
+# ------------------- Fin des vues des components ---------------------
 
 # ------------------- Vues de Connexion/Déconnexion  ---------------------
 def login_view(request: HttpRequest):
@@ -116,7 +140,7 @@ def logout_view(request: HttpRequest):
 # ------------------- Vues du profil  ---------------------
 @login_required
 def profil_view(request: HttpRequest):
-    return render(request, 'users/profil/profil.html')
+    return render(request, 'users/3_profil/profil.html')
 
 
 @login_required
@@ -134,7 +158,7 @@ def modifier_password(request: HttpRequest):
             messages.add_message(request, messages.SUCCESS,"Your password has been changed")
             return redirect('home')
         
-    return render(request, 'users/profil/modifier_password.html')
+    return render(request, 'users/3_profil/modifier_password.html')
 
 # ------------------- Vues de L'application  ---------------------
 """
@@ -147,8 +171,10 @@ def home(request: HttpRequest):
         dictionnaire['rdv'] = rdv
         dictionnaire['participants'] = rdv.participants.all()
         liste_rdvs.append(dictionnaire)
-    return render(request, 'users/index.html', {'liste_rdvs': liste_rdvs})
+    return render(request, MAIN + '/index.html', {'liste_rdvs': liste_rdvs})
 """
+
+""" Vues de la page principale MAIN """
 
 @login_required
 def home(request: HttpRequest):
@@ -158,22 +184,30 @@ def home(request: HttpRequest):
     """
     participations = Participant.objects.filter(email=request.user.email).order_by('rdv__jour')
     rdvs = [r.rdv for r in participations]
-    response = render(request, 'users/index.html', {'rdvs': rdvs})
+    response = render(request, MAIN + '/index.html', {'rdvs': rdvs})
     response.headers['HX-Trigger'] = 'getParticipants'
-    #return render(request, 'users/index.html', {'rdvs': rdvs})
+    #return render(request, MAIN + '/index.html', {'rdvs': rdvs})
     return response
 
 @login_required
 def creer_rdv(request: HttpRequest):
     user: User = request.user
+    form: RdvForm = RdvForm(request.POST or None)
     if request.method == 'POST':
-        form = Create_Rdv_Form(request.POST)
+        form = RdvForm(request.POST)
+        print(form)
         if form.is_valid():
             print("form is valid")
             #deuldou: Deuldou = DeuldouService.create_Deuldou_form(user, form)
-            deuldou: Deuldou = UserService.create_Deuldou(user,form)
+            #deuldou: Deuldou = UserService.create_Deuldou(user,form)
+            deuldou: Deuldou = form.save(commit=False)
+            deuldou.created_by = request.user
+            deuldou.save()
+            print(deuldou)
+            print(deuldou.heure_fin)
             # Si le créateur participe aussi au Deuldou
-            if form.cleaned_data['createur_participe']:
+            #if form.cleaned_data['createur_participe']:
+            if request.POST.get('createur_participe'):
                 participation: Participant = Participant.objects.create(email=user.email, rdv=deuldou, nom=user.first_name, statut=Participant.PRESENT)
             else:
                 participation: Participant = Participant.objects.create(email=user.email, rdv=deuldou, nom=user.first_name, statut=Participant.ABSENT)
@@ -182,10 +216,11 @@ def creer_rdv(request: HttpRequest):
             messages.add_message(request, messages.SUCCESS, "Votre rendez-vous a été créé avec succès !")    
             return redirect('home')
         else:
-            messages.add_message(request, messages.ERROR, "Le Rendez-vous n'a pas pu être créé !")              
-    form: Create_Rdv_Form = Create_Rdv_Form()
-    return render(request, "users/rdv/create_rdv_form.html", {'form': form})
+            messages.add_message(request, messages.ERROR, "Le Rendez-vous n'a pas pu être créé !")
+            #return render(request, "users/1_gestion_rdv/create_rdv_form.html", {'form': form})   
+    return render(request, "users/1_gestion_rdv/create_rdv_form.html", {'form': form})
 
+'''
 @login_required
 def ajouter_participant_rdv_view(request: HttpRequest, rdv_id:int):
     deuldou: Deuldou = UserService.get_Deuldou(rdv_id, request.user)
@@ -204,29 +239,48 @@ def ajouter_participant_rdv_view(request: HttpRequest, rdv_id:int):
             #Service USer mail ->
             return redirect('home')
     
-    return render(request, 'users/rdv/ajouter_participant_rdv.html', {"form": form})
+    return render(request, 'users/1_gestion_rdv/ajouter_participant_rdv.html', {"form": form})
+'''
+
 
 
 @login_required
 def htmx_updateParticipant(request: HttpRequest, id_participant: int):
     """ Retourner le Participant de ce RDV """
+    context = dict()
+    errors = set()
     try:
         participant = Participant.objects.get(pk=id_participant)
     except Exception as e:
-        return HttpResponse(ERREUR)
+        errors.add(ERREUR)
     # checker s'il s'agit bien d'un User autorisé
     if request.user.email != participant.email:
-        return HttpResponse(PERMISSION)
+        #return HttpResponse(PERMISSION)
+        errors.add(PERMISSION)
     form = HTMXParticipantForm(instance=participant)
     if request.method == 'POST':
         form = HTMXParticipantForm(request.POST, instance=participant)
         if form.is_valid():
             form.save()
+            rdv:int = participant.rdv.id
+            context['success'] = {"Votre participation a été mise à jour"}
             # retourne un Event dans le Header pour le HTMX
-            response = HttpResponse("Votre participation a été mise à jour")
-            response.headers["HX-Trigger"] = "updateParticipant"
+            #response = HttpResponse("Votre participation a été mise à jour")
+            response = render(request, TEMPLATE_INFOS, context= context)
+            response["HX-Trigger"] = 'updateParticipants_' + str(rdv)
             return response
-    return render(request, "users/htmx/participantForm.html", {'form': form, 'id_participant': id_participant})
+        else:
+            errors.add(ERREUR)
+            context['errors'] = errors
+            return render(request, TEMPLATE_INFOS, context= context)
+    
+    # retourner le formulaire s'il n'y a pas d'erreurs, sinon la liste des erreurs :
+    if len(errors) == 0:
+        return render(request, "users/0_main/partials/participantForm.html", {'form': form, 'id_participant': id_participant})
+    else:
+        context['errors'] = errors
+        return render(request, TEMPLATE_INFOS, context= context)
+
 
 @login_required
 def htmx_getParticipants(request: HttpRequest, id_rdv: int):
@@ -241,7 +295,7 @@ def htmx_getParticipants(request: HttpRequest, id_rdv: int):
     except Exception as e:
         return HttpResponse(PERMISSION)
     participants = Participant.objects.filter(rdv=rdv)
-    return render(request, "users/htmx/liste_participants.html", {'id_rdv': id_rdv, 'participants': participants})
+    return render(request, "users/0_main/partials/liste_participants.html", {'id_rdv': id_rdv, 'participants': participants})
 
     
 @login_required
@@ -263,27 +317,9 @@ def htmx_getNombreParticipants(request: HttpRequest, id_rdv: int):
     return HttpResponse("{} {}".format(str(nbparticipants), inscrits))
 
 
-
+""" Fin des vues de la page principale """
         
 
-"""
-def creer_hashtag(request):
-    user = request.user
-    if request.method == 'POST':
-        Tag.objects.create(user=user, nom=request.POST["nom"])
-    return redirect('home')
-
-
-def filtrer_par_hashtag(request):
-    # Permet de filtrer l'affichage des invitations suivant leur étiquette
-    if request.method == "POST":
-        pass
-    return redirect('home')
-
-"""
-
-
-# ------------------- Fin des Vues des ajouts de Participants à un RDV  ---------------------
 
 # ------------------- Vues de gestion des CONTACTS  ---------------------
 
@@ -292,7 +328,7 @@ def contacts_view(request: HttpRequest):
     #contacts = ContactService.get_Contacts(request.user)
     user:User = request.user
     contacts: list[Contact] = user.contacts.all()
-    return render(request, "users/contacts/index.html", {'contacts': contacts})
+    return render(request, "users/2_contacts/index.html", {'contacts': contacts})
 
 """
 @login_required
@@ -306,10 +342,10 @@ def add_contact_view(request: HttpRequest):
             messages.add_message(request, messages.SUCCESS, "Contact ajouté")
             return redirect('home')
         else:
-            return render(request, "users/contacts/add.html", {'form': form})
+            return render(request, "users/2_contacts/add.html", {'form': form})
 
     form = ContactForm(instance=Contact(user=request.user))
-    return render(request, "users/contacts/add.html", {'form': form})
+    return render(request, "users/2_contacts/add.html", {'form': form})
 """
 
 
@@ -329,14 +365,18 @@ def add_liste_contact_view(request: HttpRequest):
     form = Liste_contactsForm(instance=Liste_contacts(user=request.user))
     return render(request, "users/liste_contacts/add.html", {'form': form})
 
+# A supprimer par la suite, je pense qu'on peut s'en passer
 """
 @login_required
 def htmx_getContacts(request: HttpRequest):
     if request.method == "GET":
         user:User = request.user
         contacts: list[Contact] = user.contacts.all()
-        return render(request, "users/contacts/htmx/liste_contacts.html", {'contacts': contacts})
-"""
+        return render(request, "users/2_contacts/htmx/liste_contacts.html", {'contacts': contacts})
+
+""" 
+
+
 
 @login_required
 def htmx_addContact(request: HttpRequest):
@@ -347,18 +387,19 @@ def htmx_addContact(request: HttpRequest):
     if request.method == "GET":
         #form: ContactForm = ContactForm(initial={'user': user})
         form: ContactForm = ContactForm()
-        return render(request, "users/contacts/htmx/contactForm.html", {'form': form})
+        return render(request, "users/2_contacts/partials/contactForm.html", {'form': form})
     if request.method == "POST":
         contact: Contact = Contact(user=request.user)
         form: ContactForm = ContactForm(request.POST, instance=contact)
         if form.is_valid():
             form.save()
-            messages.add_message(request, messages.SUCCESS, "Le contact a été ajouté")
+            #messages.add_message(request, messages.SUCCESS, "Le contact a été ajouté")
 
         else:
+            pass
             #print(form.errors)
             # A faire : récupérer les erreurs du formulaire
-            messages.add_message(request, messages.ERROR, "vous ne pouvez pas enregistrer cet utilisateur !")
+            #messages.add_message(request, messages.ERROR, "vous ne pouvez pas enregistrer cet utilisateur !")
         #return redirect('contacts')
         response = HttpResponse()
         response.headers["HX-Trigger"] = "addContact"
@@ -370,25 +411,23 @@ def htmx_addContact(request: HttpRequest):
 
 @login_required
 def gerer_rdvs(request: HttpRequest):
-    rdvs: list[Deuldou] = UserService.get_Deuldous(request.user)
-    liste_rdvs = list()
-    for rdv in rdvs:
-        dictionnaire = {}
-        dictionnaire['rdv'] = rdv
-        dictionnaire['participants'] = rdv.participants.all()
-        liste_rdvs.append(dictionnaire)
-    return render(request, "users/rdv/liste.html", {'liste_rdvs': liste_rdvs})
+    rdvs: list[Deuldou] = Deuldou.objects.filter(created_by=request.user)
+    return render(request, "users/1_gestion_rdv/index.html", {'rdvs': rdvs})
 
+"""
 @login_required
 def htmx_get_contacts(request: HttpRequest, id_rdv: int):
-    """ Retourner les contacts qui ne participent pas encore à ce RDV """
+    '''Retourner les contacts qui ne participent pas encore à ce RDV '''
     if request.method == 'POST':
         rdv = get_object_or_404(Deuldou, pk=id_rdv)
         participants = Participant.objects.filter(rdv=rdv)
         emails = [p.email for p in participants]
         contacts = Contact.objects.filter(user=request.user).exclude(email__in=emails)
         print(contacts)
-        return render(request, "users/rdv/htmx/contacts.html", {'items': contacts, 'id_rdv': id_rdv})
+        return render(request, "users/1_gestion_rdv/htmx/contacts.html", {'items': contacts, 'id_rdv': id_rdv})
+
+"""
+
 
 """
 def htmx_add_contact(request: HttpRequest, id_rdv: int, id_contact: int):
@@ -410,11 +449,99 @@ def htmx_add_contact(request: HttpRequest, id_rdv: int, id_contact: int):
 
 @login_required
 def modifier_rdv(request: HttpRequest, id: int):
-    pass
+    rdv:Deuldou = Deuldou.objects.get(pk=id)
+    if request.method == 'POST':
+        pass
+    form = Create_Rdv_Form()
+    context = {'form': form, 'rdv_id': id}
+    return render(request, 'users/1_gestion_rdv/update/index.html', context=context)
+
+# Fonction à reprendre car elle trigger rdvDeleted même s'il y a une erreur lors de la suppression.
+@login_required
+def x_deleteRdv(request: HttpRequest, rdv_id: int):
+    context = dict()
+    if request.method == 'DELETE':
+        try:
+            Deuldou.objects.get(pk=rdv_id).delete()
+            context['success'] = {'Le Rendez-Vous a été supprimé'}
+            response = render(request, TEMPLATE_INFOS, context)
+            response['HX-trigger'] = json.dumps({"rdvDeleted": str(rdv_id)})
+        except:
+            context['errors'] = {ERREUR}
+            response = render(request, TEMPLATE_INFOS, context)
+        return response
+
+
+# Méthode à reprendre
+@login_required
+def x_gestion_getParticipants(request: HttpRequest, rdv_id:int):
+    '''
+    retourne la vue des participants à un Rdv \n,
+    Sécurité : Les Rdv doivent appartenir au User
+    '''
+    rdv: Deuldou = Deuldou.objects.get(pk=rdv_id)
+    if rdv.created_by != request.user:
+        return HttpResponse(PERMISSION)
+    else:
+        participants = Participant.objects.filter(rdv=rdv)
+        return render(request, "users/1_gestion_rdv/partials/participants.html", {'participants': participants})
+
 
 @login_required
-def supprimer_rdv(request: HttpRequest, id: int):
-    pass
+def x_deleteParticipant(request: HttpRequest, id: int):
+    '''Supprime le participant d'un Rdv, avec méthode DELETE \n
+    Sécurité : \n
+    Risque de suppression d'un Participant d'un autre User
+    Vérifier que le Participant appartient à un Rdv du User.
+    '''
+    if request.method == "DELETE":
+    # Sécurité :
+        participant: Participant = Participant.objects.get(pk=id)
+        rdv: Deuldou = Deuldou.objects.get(pk=participant.rdv.id)
+        context = {}
+        if rdv.created_by != request.user:
+            return HttpResponse(PERMISSION)
+        try:
+            Participant.objects.get(pk=id).delete()
+            context['success'] = {"Le participant a été supprimé"}
+        except:
+            context['errors'] = {ERREUR}
+        response = render(request, 'layout/partials/infos.html', context)
+        response['HX-Trigger'] = 'participantDeleted_' + str(rdv.id)
+        return response
+        
+    
+@login_required
+def x_addParticipant(request: HttpRequest, rdv_id: int):
+
+    if request.method == "POST":
+        form = ParticipantForm(request.POST)
+        context = {}
+        if form.is_valid():
+            print("form is valid")
+            """ Vérif de sécu :
+            Le formulaire envoyé doit correspondre au même Rdv appelé
+            """
+            '''
+            if form.cleaned_data["rdv"] != deuldou:
+                raise PermissionDenied
+            if deuldou.created_by != request.user:
+                return HttpResponse(PERMISSION)
+            '''
+            form.save()
+            context['success'] = {'Participant ajouté !'}
+            response = render(request, 'layout/partials/infos.html', context)
+            response['HX-Trigger'] = 'participantAdded_' + str(rdv_id)
+            return response
+        context['errors'] = {"Le participant n'a pas pu être ajouté"}
+        return render(request, 'layout/partials/infos.html', context)
+    
+    deuldou: Deuldou = Deuldou.objects.get(pk=rdv_id)
+    # Il faut instancier avant le formulaire pour récupérer la value du rdv pour le formulaire (dans la vue)
+    form = ParticipantForm(instance=Participant(rdv=deuldou))
+    context = {"form": form, "rdv_id": rdv_id}
+    return render(request, 'users/1_gestion_rdv/partials/modalParticipant.html', context=context)
+
 
 # ------------------- Fin des Vues de gestion des RDV  ---------------------
 

@@ -30,12 +30,12 @@ class Deuldou(models.Model):
     nom = models.CharField(max_length=100, null=False)
     jour = models.DateField(null=False)
     heure_debut = models.TimeField(default='00:00')
-    heure_fin = models.TimeField(default='00:00')
+    heure_fin = models.TimeField(default='00:00', blank=True)
     lieu = models.TextField(null=False, max_length=100)
     # config :
     # nombre min = minimum de participants à participer pour valider le rdv
     nbre_min = models.IntegerField(default=0)
-    createur_participe = models.BooleanField(default=False)
+    #createur_participe = models.BooleanField(default=False)
 
     def __str__(self):
         return self.nom
