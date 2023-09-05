@@ -190,6 +190,13 @@ def home(request: HttpRequest):
     return response
 
 @login_required
+def x_addRdv(request: HttpRequest):
+    """ retourne le formulaire vide si GET """
+    user: User = request.user
+    form: RdvForm = RdvForm(request.POST or None)
+    return render(request, 'components/RdvForm.html', {'form': form}) 
+
+@login_required
 def creer_rdv(request: HttpRequest):
     user: User = request.user
     form: RdvForm = RdvForm(request.POST or None)

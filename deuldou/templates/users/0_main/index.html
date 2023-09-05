@@ -23,8 +23,13 @@
   </div>
 -->
 
+{% comment %}
+Modal générique - par exemple pour ajouter un Rdv
+{% endcomment %}
 
-<!-- Modal -->
+{% include 'layout/partials/modal.html' %}
+
+<!-- Modal de participation -->
 <div class="modal fade" id="ModalUpdateParticipation" tabindex="-1" aria-labelledby="ModalUpdateParticipation" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content" id="ModalUpdateParticipationContent">
@@ -44,7 +49,18 @@
             <div class="mb-3 d-flex justify-content-end">
                 <a class="btn btn-primary btn-sm" href="{% url 'creer_rdv' %}"><b>+ </b>Ajouter un rendez-vous</a>
             </div>
-        
+
+            <!-- Button trigger modal -->
+            <div class="mb-3 d-flex justify-content-end">
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal"
+                hx-get="{% url 'x_addRdv' %}"
+                hx-swap="innerHTML"
+                hx-target="#modalContent">
+                    <b>+ </b>Ajouter un rendez-vous Modal
+                  </button>
+            </div>
+
+           
     
     {% for rdv in rdvs %}
     <div class="card text-bg-light mb-3">

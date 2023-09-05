@@ -9,6 +9,7 @@ urlpatterns = [
     #path('', views.connexion, name="connexion"),
     path('', views.home, name="home"),
     path('creer_rdv', views.creer_rdv, name="creer_rdv"),
+    path('x_addRdv', views.x_addRdv, name="x_addRdv"),
     path('login', views.login_view, name="login"),
     path('registration', views.registration, name="registration"),
     path('modifier_password', views.modifier_password, name="modifier_password"),

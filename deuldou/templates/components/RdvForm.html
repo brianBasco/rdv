@@ -10,6 +10,10 @@
 {% endfor %}
 {% endif %}
 
+<div class="container">
+    <div class="form-text">Les champs marqués d'une étoile <b>(*)</b> sont obligatoires</div>
+</div>
+
     <form method="POST" class="form p-2" action="{% url 'creer_rdv' %}">
         {% csrf_token %}
         {% load widget_tweaks %}

@@ -116,7 +116,8 @@ Terminer Gestion utilisateur et mot de passe :
 
 - Corriger l'ajout du User en PArticipant à un rdv (nom = null pour l'instant) :OK Fait
   
-- Créer la classe de services USER (ajout participant; participants, deuldou etc...)
+- Finir le formulaire d'ajout d'un rdv avec les erreurs
+
 - tests à faire :
   - permission de créer rdv : Fait
   - Ne pas ajouter de particpant à un rdv d'un autre user : Fait par erreur 403
