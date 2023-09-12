@@ -1,5 +1,7 @@
 {# Display a form #}
 
+<div id="RdvForm">
+
 {% if form.errors %}
 {% for field in form %}
 {% for error in field.errors %}
@@ -14,7 +16,10 @@
     <div class="form-text">Les champs marqués d'une étoile <b>(*)</b> sont obligatoires</div>
 </div>
 
-    <form method="POST" class="form p-2" action="{% url 'creer_rdv' %}">
+    <form class="form p-2"
+    hx-post="{% url 'x_addRdv' %}"
+    hx-swap="outerHTML"
+    hx-target="#RdvForm">
         {% csrf_token %}
         {% load widget_tweaks %}
         
@@ -54,3 +59,4 @@
 
 
     </form>
+</div>

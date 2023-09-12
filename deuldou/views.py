@@ -182,11 +182,23 @@ def home(request: HttpRequest):
     Retourne la liste des RDV où le User participe\n
     Classement des participations dans l'ordre ascendant
     """
+    # participations = Participant.objects.filter(email=request.user.email).order_by('rdv__jour')
+    # rdvs = [r.rdv for r in participations]
+    # response = render(request, MAIN + '/index.html', {'rdvs': rdvs})
+    # response.headers['HX-Trigger'] = 'getParticipants'
+    return render(request, MAIN + '/index.html')
+    #return response
+
+@login_required
+def x_getRdvs(request: HttpRequest):
+    """
+    Retourne la liste des RDV où le User participe\n
+    Classement des participations dans l'ordre ascendant
+    """
     participations = Participant.objects.filter(email=request.user.email).order_by('rdv__jour')
     rdvs = [r.rdv for r in participations]
-    response = render(request, MAIN + '/index.html', {'rdvs': rdvs})
+    response = render(request, MAIN + '/partials/liste_rdvs.html', {'rdvs': rdvs})
     response.headers['HX-Trigger'] = 'getParticipants'
-    #return render(request, MAIN + '/index.html', {'rdvs': rdvs})
     return response
 
 @login_required
@@ -194,8 +206,26 @@ def x_addRdv(request: HttpRequest):
     """ retourne le formulaire vide si GET """
     user: User = request.user
     form: RdvForm = RdvForm(request.POST or None)
+    #context = {}
+    #print(form)
+    if request.method == "POST" and form.is_valid():
+        print(request.POST)
+        deuldou: Deuldou = form.save(commit=False)
+        deuldou.created_by = request.user
+        deuldou.save()
+        participation: Participant = Participant(email=user.email, rdv=deuldou, nom=user.first_name)
+        if request.POST.get('createur_participe'):
+            participation.statut=Participant.PRESENT
+        else:
+            participation.statut=Participant.ABSENT
+        participation.save()
+        response: HttpResponse = HttpResponse("Votre rdv a été créé !")
+        response["HX-Trigger"] = 'updateRDV'
+        return response
     return render(request, 'components/RdvForm.html', {'form': form}) 
 
+
+# Méthode à supprimer par la suite
 @login_required
 def creer_rdv(request: HttpRequest):
     user: User = request.user
