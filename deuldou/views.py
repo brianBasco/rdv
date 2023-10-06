@@ -22,8 +22,7 @@ from pwgen import pwgen
 
 from .forms import (Add_Participant_Form, ContactForm, HTMXParticipantForm,
                     Liste_contactsForm, ParticipantForm, RdvForm)
-from .models import (Contact, Deuldou, Invite, Liste_contacts, Participant,
-                     Tag, User)
+from .models import Contact, Deuldou, Liste_contacts, Participant, Tag, User
 
 # ------------------- Paramètres de config -----------------------
 
@@ -161,20 +160,6 @@ def modifier_password(request: HttpRequest):
     return render(request, 'users/3_profil/modifier_password.html')
 
 # ------------------- Vues de L'application  ---------------------
-"""
-@login_required
-def home(request: HttpRequest):
-    rdvs: list[Deuldou] = UserService.get_Deuldous(request.user)
-    liste_rdvs = list()
-    for rdv in rdvs:
-        dictionnaire = {}
-        dictionnaire['rdv'] = rdv
-        dictionnaire['participants'] = rdv.participants.all()
-        liste_rdvs.append(dictionnaire)
-    return render(request, MAIN + '/index.html', {'liste_rdvs': liste_rdvs})
-"""
-
-""" Vues de la page principale MAIN """
 
 @login_required
 def home(request: HttpRequest):
@@ -182,12 +167,8 @@ def home(request: HttpRequest):
     Retourne la liste des RDV où le User participe\n
     Classement des participations dans l'ordre ascendant
     """
-    # participations = Participant.objects.filter(email=request.user.email).order_by('rdv__jour')
-    # rdvs = [r.rdv for r in participations]
-    # response = render(request, MAIN + '/index.html', {'rdvs': rdvs})
-    # response.headers['HX-Trigger'] = 'getParticipants'
     return render(request, MAIN + '/index.html')
-    #return response
+
 
 @login_required
 def x_getRdvs(request: HttpRequest):
@@ -206,10 +187,7 @@ def x_addRdv(request: HttpRequest):
     """ retourne le formulaire vide si GET """
     user: User = request.user
     form: RdvForm = RdvForm(request.POST or None)
-    #context = {}
-    #print(form)
     if request.method == "POST" and form.is_valid():
-        print(request.POST)
         deuldou: Deuldou = form.save(commit=False)
         deuldou.created_by = request.user
         deuldou.save()
@@ -223,62 +201,6 @@ def x_addRdv(request: HttpRequest):
         response["HX-Trigger"] = 'updateRDV'
         return response
     return render(request, 'components/RdvForm.html', {'form': form}) 
-
-
-# Méthode à supprimer par la suite
-@login_required
-def creer_rdv(request: HttpRequest):
-    user: User = request.user
-    form: RdvForm = RdvForm(request.POST or None)
-    if request.method == 'POST':
-        form = RdvForm(request.POST)
-        print(form)
-        if form.is_valid():
-            print("form is valid")
-            #deuldou: Deuldou = DeuldouService.create_Deuldou_form(user, form)
-            #deuldou: Deuldou = UserService.create_Deuldou(user,form)
-            deuldou: Deuldou = form.save(commit=False)
-            deuldou.created_by = request.user
-            deuldou.save()
-            print(deuldou)
-            print(deuldou.heure_fin)
-            # Si le créateur participe aussi au Deuldou
-            #if form.cleaned_data['createur_participe']:
-            if request.POST.get('createur_participe'):
-                participation: Participant = Participant.objects.create(email=user.email, rdv=deuldou, nom=user.first_name, statut=Participant.PRESENT)
-            else:
-                participation: Participant = Participant.objects.create(email=user.email, rdv=deuldou, nom=user.first_name, statut=Participant.ABSENT)
-                #UserService.participate(user, deuldou)
-                #ParticipantService.ajouter_Participant(user.email,user.first_name,deuldou)
-            messages.add_message(request, messages.SUCCESS, "Votre rendez-vous a été créé avec succès !")    
-            return redirect('home')
-        else:
-            messages.add_message(request, messages.ERROR, "Le Rendez-vous n'a pas pu être créé !")
-            #return render(request, "users/1_gestion_rdv/create_rdv_form.html", {'form': form})   
-    return render(request, "users/1_gestion_rdv/create_rdv_form.html", {'form': form})
-
-'''
-@login_required
-def ajouter_participant_rdv_view(request: HttpRequest, rdv_id:int):
-    deuldou: Deuldou = UserService.get_Deuldou(rdv_id, request.user)
-    form = ParticipantForm(instance=Participant(rdv=deuldou))
-
-    if request.method == "POST" :
-        form = ParticipantForm(request.POST)
-        if form.is_valid():
-            """ Vérif de sécu :
-            Le formulaire envoyé doit correspondre au même Rdv appelé
-            """
-            if form.cleaned_data["rdv"] != deuldou:
-                raise PermissionDenied
-            form.save()
-            messages.add_message(request, messages.SUCCESS, "un participant ajouté !")
-            #Service USer mail ->
-            return redirect('home')
-    
-    return render(request, 'users/1_gestion_rdv/ajouter_participant_rdv.html', {"form": form})
-'''
-
 
 
 @login_required
@@ -328,6 +250,7 @@ def htmx_getParticipants(request: HttpRequest, id_rdv: int):
         return HttpResponse(ERREUR)
     # Sécurité : le User qui demande ce RDV participe t-il à ce RDV ? S'il participe il doit donc avoir un participation correspondant à son email et au RDV
     try:
+        # ??? Faire à la place une méthod de classe pour appeler les participants avec sécurité ??
         Participant.objects.get(rdv=rdv, email=request.user.email)
     except Exception as e:
         return HttpResponse(PERMISSION)
@@ -367,24 +290,6 @@ def contacts_view(request: HttpRequest):
     contacts: list[Contact] = user.contacts.all()
     return render(request, "users/2_contacts/index.html", {'contacts': contacts})
 
-"""
-@login_required
-def add_contact_view(request: HttpRequest):
-    if request.method == "POST":
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            if form.cleaned_data["user"] != request.user:
-                raise PermissionDenied
-            form.save()
-            messages.add_message(request, messages.SUCCESS, "Contact ajouté")
-            return redirect('home')
-        else:
-            return render(request, "users/2_contacts/add.html", {'form': form})
-
-    form = ContactForm(instance=Contact(user=request.user))
-    return render(request, "users/2_contacts/add.html", {'form': form})
-"""
-
 
 @login_required
 def add_liste_contact_view(request: HttpRequest):
@@ -401,18 +306,6 @@ def add_liste_contact_view(request: HttpRequest):
 
     form = Liste_contactsForm(instance=Liste_contacts(user=request.user))
     return render(request, "users/liste_contacts/add.html", {'form': form})
-
-# A supprimer par la suite, je pense qu'on peut s'en passer
-"""
-@login_required
-def htmx_getContacts(request: HttpRequest):
-    if request.method == "GET":
-        user:User = request.user
-        contacts: list[Contact] = user.contacts.all()
-        return render(request, "users/2_contacts/htmx/liste_contacts.html", {'contacts': contacts})
-
-""" 
-
 
 
 @login_required
@@ -448,45 +341,20 @@ def htmx_addContact(request: HttpRequest):
 
 @login_required
 def gerer_rdvs(request: HttpRequest):
+    """
+    Sécurité OK
+    """
     rdvs: list[Deuldou] = Deuldou.objects.filter(created_by=request.user)
     return render(request, "users/1_gestion_rdv/index.html", {'rdvs': rdvs})
-
-"""
-@login_required
-def htmx_get_contacts(request: HttpRequest, id_rdv: int):
-    '''Retourner les contacts qui ne participent pas encore à ce RDV '''
-    if request.method == 'POST':
-        rdv = get_object_or_404(Deuldou, pk=id_rdv)
-        participants = Participant.objects.filter(rdv=rdv)
-        emails = [p.email for p in participants]
-        contacts = Contact.objects.filter(user=request.user).exclude(email__in=emails)
-        print(contacts)
-        return render(request, "users/1_gestion_rdv/htmx/contacts.html", {'items': contacts, 'id_rdv': id_rdv})
-
-"""
-
-
-"""
-def htmx_add_contact(request: HttpRequest, id_rdv: int, id_contact: int):
-    '''
-    Ajouter le contact comme participant\n
-    Retourner les contacts qui ne participent pas encore à ce RDV
-    '''
-    if request.method == 'POST':
-        contact = get_object_or_404(Contact, pk=id_contact)
-        rdv = get_object_or_404(Deuldou, pk=id_rdv)
-        try:
-            ParticipantService.ajouter_Participant(contact.email, contact.nom, rdv=rdv)
-        except:
-            return HttpResponse("Une erreur est survenue lors de l'ajout du Contact")
-        return htmx_get_contacts(request,id_rdv)
-
-"""   
 
 
 @login_required
 def modifier_rdv(request: HttpRequest, id: int):
-    rdv:Deuldou = Deuldou.objects.get(pk=id)
+    #rdv:Deuldou = Deuldou.objects.get(pk=id)
+    try:
+        rdv:Deuldou = Deuldou.get_for_user(pk=id, user=request.user)
+    except Exception:
+        return HttpResponse(PERMISSION)
     if request.method == 'POST':
         pass
     form = Create_Rdv_Form()

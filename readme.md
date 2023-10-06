@@ -103,8 +103,8 @@ pwgen(10, symbols=False)
 
 # A faire :
 Utilisateur test :
-test@gmail.com
-mon mdp de NBA
+test2@gmail.com
+Jordan23+
 Terminer Gestion utilisateur et mot de passe :
 - checker backend mot de passe + de 8 caractères et NonNumeric entièrement : OK (avec validators de Django)
 - checker backend format Email respecté : A faire

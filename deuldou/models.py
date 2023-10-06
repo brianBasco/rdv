@@ -1,14 +1,11 @@
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
 from django.utils import timezone
 
-
 # Create your models here.
-class Utilisateur(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    modifier_password = models.BooleanField(default=True)
+
 
 class Tag(models.Model):
     """
@@ -39,118 +36,13 @@ class Deuldou(models.Model):
 
     def __str__(self):
         return self.nom
-
-# Un user peut créer des étiquettes pour les affecter à ses deuldous :
-# exemple : étiquette match ou entrainement ou travail etc...
-# Un User ne peut pas s'inscrire 2 fois à un deuldou :
-# Contrainte unique sur les clés deuldou et user
-
-"""
-class Meta:
-    constraints = [
-        models.UniqueConstraint(
-            fields=["deuldou", "user"], name='participation unique'),
-    ]
-"""
-
-
-class Statut(models.Model):
-    nom = models.CharField(max_length=50)
-
-
-
-# -----------------------Modèle V1 -----------------------------------------------
-class Invite(models.Model):
-    """
-    Un invité s'inscrit à un Rdv avec son email (ces 2 champs sont obligatoires)
-    Si l'invité s'inscrit alors il devra choisir son statut
-    """
-    """ ------------ Obligatoire-------- """
-    deuldou = models.ForeignKey(
-        Deuldou, on_delete=models.CASCADE, related_name='invites')
-    email = models.CharField(max_length=200)
-    """ ------------ Facultatif-------- """
-    est_inscrit = models.BooleanField(default=False)
-    statut = models.ForeignKey(Statut, on_delete=models.DO_NOTHING, null=True)
-    visible = models.BooleanField(default=True)
-    invited_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='invites', null=True)
-    prenom = models.CharField(max_length=100, null=True, blank=True)
-    nom = models.CharField(max_length=100, null=True, blank=True)
-    utilisateur = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    commentaire = models.TextField(null=True)
-    tags = models.ManyToManyField(Tag)
-
-    def __str__(self):
-        return self.email
-
-    """
-    Un Invité ne peut pas être invité 2 fois à un même deuldou :
-    un Invité est identifié grâce à son email
-    Contrainte unique sur les clés deuldou et email    
-    """
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["deuldou", "email"], name='invitation unique'),
-        ]
-
-
-
-
-
-class Liste_invitation(models.Model):
-    """ Un User peut enregistrer ses invitations dans des listes : """
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listes_invitation')
-    nom = models.CharField(max_length=100)
-    invites = models.ManyToManyField(Invite)
-
-    def __str__(self):
-        return self.nom
-
-# --------------------------- Fin du Modèle V1 -------------------------------------------
-
-
-
-# --------------------------- Modèle V2 -------------------------------------------
-
-
-""" class Participant(models.Model):
-    \""" ------------ Choix -------- \"""
-    PRESENT = "PR"
-    ABSENT = "AB"
-    RETARD = "RE"
-    INCERTAIN = "IN"
-    VIDE = "VI"
-    STATUTS_CHOICES = [
-        (PRESENT, "Présent"),
-        (ABSENT, "Absent"),
-        (RETARD, "En retard"),
-        (INCERTAIN, "Incertain"),
-        (VIDE, "Non inscrit"),
-    ]
-    \""" ------------ Obligatoire-------- \"""
-    rdv = models.ForeignKey(
-        Deuldou, on_delete=models.CASCADE, related_name='participants')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participations')
-    nom = models.CharField(max_length=200, default="anonyme")
-    \""" ------------ Facultatif-------- \"""
-    statut = models.CharField(max_length=2,choices=STATUTS_CHOICES,default=VIDE)
-    visible = models.BooleanField(default=True)
-    commentaire = models.TextField(null=True)
-    tags = models.ManyToManyField(Tag)
-
-    def __str__(self):
-        return self.nom
-
-    \"""
-    Contrainte unique sur les clés RDV et USER    
-    \"""
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["rdv", "user"], name='participation unique'),
-        ] """
-
+    
+    @classmethod
+    def get_for_user(cls,rdv_id,user):
+        rdv = Deuldou.objects.get(pk=rdv_id)
+        if rdv.created_by != user:
+            raise PermissionDenied()
+        return rdv
 
 
 class Participant(models.Model):
