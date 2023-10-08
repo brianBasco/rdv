@@ -44,7 +44,7 @@ urlpatterns = [
     # HTMX
     path('htmx_updateParticipant/<int:id_participant>', views.htmx_updateParticipant, name="htmx_updateParticipant"),
     path('htmx_getParticipants/<int:id_rdv>', views.htmx_getParticipants, name="htmx_getParticipants"),
-    path('htmx_getNombreParticipants/<int:id_rdv>', views.htmx_getNombreParticipants, name="htmx_getNombreParticipants"),
+    #path('htmx_getNombreParticipants/<int:id_rdv>', views.htmx_getNombreParticipants, name="htmx_getNombreParticipants"),
 
     path("password_reset/", auth_views.PasswordResetView.as_view(template_name='registration/password_reset.html'), name="password_reset"),
     path("password_reset_done/", auth_views.PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'), name="password_reset_done"),

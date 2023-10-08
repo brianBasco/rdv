@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.password_validation import (MinimumLengthValidator,
                                                      NumericPasswordValidator)
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.forms import ValidationError
@@ -173,6 +173,7 @@ def home(request: HttpRequest):
 @login_required
 def x_getRdvs(request: HttpRequest):
     """
+    Sécurité : OK
     Retourne la liste des RDV où le User participe\n
     Classement des participations dans l'ordre ascendant
     """
@@ -184,7 +185,10 @@ def x_getRdvs(request: HttpRequest):
 
 @login_required
 def x_addRdv(request: HttpRequest):
-    """ retourne le formulaire vide si GET """
+    """ 
+    Sécurité : OK
+    retourne le formulaire vide si GET
+    """
     user: User = request.user
     form: RdvForm = RdvForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -205,17 +209,27 @@ def x_addRdv(request: HttpRequest):
 
 @login_required
 def htmx_updateParticipant(request: HttpRequest, id_participant: int):
-    """ Retourner le Participant de ce RDV """
+    """
+    Sécurité : à tester !
+    Retourne le Participant de ce RDV
+    """
     context = dict()
     errors = set()
     try:
-        participant = Participant.objects.get(pk=id_participant)
-    except Exception as e:
+        #participant = Participant.objects.get(pk=id_participant)
+        participant = Participant.get_for_user(id_participant,request.user)
+    except ObjectDoesNotExist :
         errors.add(ERREUR)
-    # checker s'il s'agit bien d'un User autorisé
-    if request.user.email != participant.email:
-        #return HttpResponse(PERMISSION)
+        context['errors'] = errors
+        return render(request, TEMPLATE_INFOS, context= context)
+    except PermissionDenied:
         errors.add(PERMISSION)
+        context['errors'] = errors
+        return render(request, TEMPLATE_INFOS, context= context)
+    # checker s'il s'agit bien d'un User autorisé
+    #if request.user.email != participant.email:
+    #    #return HttpResponse(PERMISSION)
+    #    errors.add(PERMISSION)
     form = HTMXParticipantForm(instance=participant)
     if request.method == 'POST':
         form = HTMXParticipantForm(request.POST, instance=participant)
@@ -229,35 +243,45 @@ def htmx_updateParticipant(request: HttpRequest, id_participant: int):
             response["HX-Trigger"] = 'updateParticipants_' + str(rdv)
             return response
         else:
-            errors.add(ERREUR)
+            errors.add(ERREUR + " le formulaire n'est pas valide")
             context['errors'] = errors
             return render(request, TEMPLATE_INFOS, context= context)
     
+    return render(request, "users/0_main/partials/participantForm.html", {'form': form, 'id_participant': id_participant})
     # retourner le formulaire s'il n'y a pas d'erreurs, sinon la liste des erreurs :
-    if len(errors) == 0:
-        return render(request, "users/0_main/partials/participantForm.html", {'form': form, 'id_participant': id_participant})
-    else:
-        context['errors'] = errors
-        return render(request, TEMPLATE_INFOS, context= context)
+    #if len(errors) == 0:
+    #    return render(request, "users/0_main/partials/participantForm.html", {'form': form, 'id_participant': id_participant})
+    #else:
+    #    context['errors'] = errors
+    #    return render(request, TEMPLATE_INFOS, context= context)
 
 
 @login_required
 def htmx_getParticipants(request: HttpRequest, id_rdv: int):
-    """ Retourne les participants à un RDV """
+    """
+    Sécurité : à tester !!
+    Retourne les participants à un RDV
+    """
     try:
         rdv = Deuldou.objects.get(pk=id_rdv)
     except Exception:
         return HttpResponse(ERREUR)
     # Sécurité : le User qui demande ce RDV participe t-il à ce RDV ? S'il participe il doit donc avoir un participation correspondant à son email et au RDV
     try:
-        # ??? Faire à la place une méthod de classe pour appeler les participants avec sécurité ??
         Participant.objects.get(rdv=rdv, email=request.user.email)
-    except Exception as e:
+    except Exception :
         return HttpResponse(PERMISSION)
     participants = Participant.objects.filter(rdv=rdv)
-    return render(request, "users/0_main/partials/liste_participants.html", {'id_rdv': id_rdv, 'participants': participants})
+    # Ajout du nombre de participants :
+    #nbparticipants = Participant.objects.filter(Q(statut=Participant.PRESENT) | Q(statut=Participant.RETARD), rdv=rdv).count()
+    nbparticipants = participants.filter(Q(statut=Participant.PRESENT) | Q(statut=Participant.RETARD), rdv=rdv).count()
+    inscrits = 'inscrits'
+    if nbparticipants < 2:
+        inscrits = 'inscrit'
+    nbre = "{} {}".format(str(nbparticipants), inscrits)
+    return render(request, "users/0_main/partials/liste_participants.html", {'id_rdv': id_rdv, 'participants': participants, 'nbre':nbre})
 
-    
+'''
 @login_required
 def htmx_getNombreParticipants(request: HttpRequest, id_rdv: int):
     """ Retourne le nombre de participants présents et en retard à un RDV """
@@ -275,6 +299,8 @@ def htmx_getNombreParticipants(request: HttpRequest, id_rdv: int):
     if nbparticipants < 2:
         inscrits = 'inscrit'
     return HttpResponse("{} {}".format(str(nbparticipants), inscrits))
+'''    
+
 
 
 """ Fin des vues de la page principale """
@@ -364,6 +390,10 @@ def modifier_rdv(request: HttpRequest, id: int):
 # Fonction à reprendre car elle trigger rdvDeleted même s'il y a une erreur lors de la suppression.
 @login_required
 def x_deleteRdv(request: HttpRequest, rdv_id: int):
+    """
+    Sécurité : à tester
+    Supprimme un RDV
+    """
     context = dict()
     if request.method == 'DELETE':
         try:
@@ -381,21 +411,24 @@ def x_deleteRdv(request: HttpRequest, rdv_id: int):
 @login_required
 def x_gestion_getParticipants(request: HttpRequest, rdv_id:int):
     '''
-    retourne la vue des participants à un Rdv \n,
+    Sécurité : à faire !!
+    retourne la vue des participants à un Rdv créé par le USER \n,
     Sécurité : Les Rdv doivent appartenir au User
     '''
-    rdv: Deuldou = Deuldou.objects.get(pk=rdv_id)
-    if rdv.created_by != request.user:
+    try:
+        rdv: Deuldou = Deuldou.get_for_user(rdv_id=rdv_id,user=request.user)
+    except ObjectDoesNotExist:
+        return HttpResponse(ERREUR)
+    except PermissionDenied :
         return HttpResponse(PERMISSION)
-    else:
-        participants = Participant.objects.filter(rdv=rdv)
-        return render(request, "users/1_gestion_rdv/partials/participants.html", {'participants': participants})
+    participants = Participant.objects.filter(rdv=rdv)
+    return render(request, "users/1_gestion_rdv/partials/participants.html", {'participants': participants})
 
 
 @login_required
 def x_deleteParticipant(request: HttpRequest, id: int):
     '''Supprime le participant d'un Rdv, avec méthode DELETE \n
-    Sécurité : \n
+    Sécurité : à tester !! \n
     Risque de suppression d'un Participant d'un autre User
     Vérifier que le Participant appartient à un Rdv du User.
     '''

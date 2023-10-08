@@ -12,11 +12,16 @@
                     data-bs-target="#participants_{{ rdv.id }}" aria-expanded="false" aria-controls="collapseParticipants">
                     Participants
                 </button>
+                {% comment %}
+                A supprimer par la suite
                 <button class="btn btn-outline-secondary btn-sm" type="button"
                 hx-trigger="load, updateParticipants_{{ rdv.id }} from:body"
                 hx-get="{% url 'htmx_getNombreParticipants' rdv.id %}" hx-swap="innerHTML">
                     Nombre inscrits
                 </button>
+                {% endcomment %}
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="nbre_participants"></button>
+
                 <button class="btn btn-outline-secondary btn-sm" type="button">
                     Ajouter dans Calendrier
                 </button>

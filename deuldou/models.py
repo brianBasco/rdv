@@ -1,6 +1,7 @@
 
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import (ObjectDoesNotExist, PermissionDenied,
+                                    ValidationError)
 from django.db import models
 from django.utils import timezone
 
@@ -84,6 +85,16 @@ class Participant(models.Model):
             models.UniqueConstraint(
                 fields=["rdv", "email"], name='participation unique', violation_error_message="Ce participant existe déjà"),
         ]
+    
+    @classmethod
+    def get_for_user(cls, participant_id:int, user:User):
+        try:
+            participant: Participant = cls.objects.get(pk=participant_id)
+        except Exception:
+            return ObjectDoesNotExist()
+        if participant.email != user.email:
+            return PermissionDenied()
+        return participant
 
 
 
