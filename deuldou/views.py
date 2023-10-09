@@ -281,32 +281,8 @@ def htmx_getParticipants(request: HttpRequest, id_rdv: int):
     nbre = "{} {}".format(str(nbparticipants), inscrits)
     return render(request, "users/0_main/partials/liste_participants.html", {'id_rdv': id_rdv, 'participants': participants, 'nbre':nbre})
 
-'''
-@login_required
-def htmx_getNombreParticipants(request: HttpRequest, id_rdv: int):
-    """ Retourne le nombre de participants présents et en retard à un RDV """
-    try:
-        rdv = Deuldou.objects.get(pk=id_rdv)
-    except Exception as e:
-        return HttpResponse(ERREUR)
-    # Sécurité : le User qui demande ce RDV participe t-il à ce RDV ? S'il participe il doit donc avoir un participation correspondant à son email et au RDV
-    try:
-        Participant.objects.get(rdv=rdv, email=request.user.email)
-    except Exception as e:
-        return HttpResponse(PERMISSION)
-    nbparticipants = Participant.objects.filter(Q(statut=Participant.PRESENT) | Q(statut=Participant.RETARD), rdv=rdv).count()
-    inscrits = 'inscrits'
-    if nbparticipants < 2:
-        inscrits = 'inscrit'
-    return HttpResponse("{} {}".format(str(nbparticipants), inscrits))
-'''    
-
-
-
-""" Fin des vues de la page principale """
+# ------------------- Fin des vues de la page principale  ---------------------
         
-
-
 # ------------------- Vues de gestion des CONTACTS  ---------------------
 
 @login_required
@@ -368,7 +344,9 @@ def htmx_addContact(request: HttpRequest):
 @login_required
 def gerer_rdvs(request: HttpRequest):
     """
-    Sécurité OK
+    Sécurité: OK
+    Retourne les RDV créés par le USER
+    Fonctionnel
     """
     rdvs: list[Deuldou] = Deuldou.objects.filter(created_by=request.user)
     return render(request, "users/1_gestion_rdv/index.html", {'rdvs': rdvs})
@@ -376,44 +354,59 @@ def gerer_rdvs(request: HttpRequest):
 
 @login_required
 def modifier_rdv(request: HttpRequest, id: int):
-    #rdv:Deuldou = Deuldou.objects.get(pk=id)
+    """
+    Sécurité : à tester
+    Retourne un RDV créé par le USER pour modification
+    Renvoyer les erreurs sur le formulaire si formulaire non valide
+    NON FONCTIONNEL
+    """
     try:
-        rdv:Deuldou = Deuldou.get_for_user(pk=id, user=request.user)
-    except Exception:
+        rdv:Deuldou = Deuldou.get_for_user(rdv_id=id, user=request.user)
+    except ObjectDoesNotExist :
+        return HttpResponse(ERREUR)
+    except PermissionDenied :
         return HttpResponse(PERMISSION)
-    if request.method == 'POST':
-        pass
-    form = Create_Rdv_Form()
+    form = RdvForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        response = HttpResponse("Le Rdv a été modifié !")
+        response["HX-trigger"] = "rdv_updated"
+        return response
     context = {'form': form, 'rdv_id': id}
     return render(request, 'users/1_gestion_rdv/update/index.html', context=context)
 
-# Fonction à reprendre car elle trigger rdvDeleted même s'il y a une erreur lors de la suppression.
 @login_required
 def x_deleteRdv(request: HttpRequest, rdv_id: int):
     """
     Sécurité : à tester
-    Supprimme un RDV
+    Supprimme un RDV créé par le USER
+    Fonctionnel
     """
     context = dict()
     if request.method == 'DELETE':
         try:
-            Deuldou.objects.get(pk=rdv_id).delete()
+            rdv: Deuldou = Deuldou.get_for_user(rdv_id=rdv_id, user=request.user)
+        except ObjectDoesNotExist:
+            context['errors'] = {ERREUR}
+        except PermissionDenied:
+            context['errors'] = {PERMISSION}
+        else:
+            rdv.delete()
             context['success'] = {'Le Rendez-Vous a été supprimé'}
             response = render(request, TEMPLATE_INFOS, context)
             response['HX-trigger'] = json.dumps({"rdvDeleted": str(rdv_id)})
-        except:
-            context['errors'] = {ERREUR}
-            response = render(request, TEMPLATE_INFOS, context)
-        return response
+            return response
+        return render(request, TEMPLATE_INFOS, context)
+        
 
 
 # Méthode à reprendre
 @login_required
 def x_gestion_getParticipants(request: HttpRequest, rdv_id:int):
     '''
-    Sécurité : à faire !!
-    retourne la vue des participants à un Rdv créé par le USER \n,
-    Sécurité : Les Rdv doivent appartenir au User
+    Sécurité : à tester
+    retourne la liste des participants à un Rdv créé par le USER \n,
+    Fonctionnel
     '''
     try:
         rdv: Deuldou = Deuldou.get_for_user(rdv_id=rdv_id,user=request.user)
@@ -427,56 +420,70 @@ def x_gestion_getParticipants(request: HttpRequest, rdv_id:int):
 
 @login_required
 def x_deleteParticipant(request: HttpRequest, id: int):
-    '''Supprime le participant d'un Rdv, avec méthode DELETE \n
-    Sécurité : à tester !! \n
+    '''
+    Supprime le participant d'un Rdv, avec méthode DELETE \n
+    Sécurité : à tester  \n
     Risque de suppression d'un Participant d'un autre User
     Vérifier que le Participant appartient à un Rdv du User.
+    Fonctionnel
     '''
     if request.method == "DELETE":
-    # Sécurité :
-        participant: Participant = Participant.objects.get(pk=id)
-        rdv: Deuldou = Deuldou.objects.get(pk=participant.rdv.id)
         context = {}
-        if rdv.created_by != request.user:
-            return HttpResponse(PERMISSION)
+        # Sécurité :
         try:
-            Participant.objects.get(pk=id).delete()
-            context['success'] = {"Le participant a été supprimé"}
-        except:
+            participant: Participant = Participant.objects.get(pk=id)
+        except ObjectDoesNotExist:
             context['errors'] = {ERREUR}
-        response = render(request, 'layout/partials/infos.html', context)
-        response['HX-Trigger'] = 'participantDeleted_' + str(rdv.id)
-        return response
+        else:
+            try:
+                rdv: Deuldou = Deuldou.get_for_user(rdv_id=participant.rdv.id, user=request.user)
+            except ObjectDoesNotExist :
+                context['errors'] = {ERREUR}
+            except PermissionDenied:
+                context['errors'] = {PERMISSION}
+            else:
+                participant.delete()
+                context['success'] = {"Le participant a été supprimé"}
+                response = render(request, 'layout/partials/infos.html', context)
+                response['HX-Trigger'] = 'participantDeleted_' + str(rdv.id)
+                return response
+        return render(request, 'layout/partials/infos.html', context)
         
     
 @login_required
 def x_addParticipant(request: HttpRequest, rdv_id: int):
-
+    """
+    Sécurité : à tester
+    Ajoute un participant à un RDV créé par le USER
+    NON FONCTIONNEL
+    """
+    context = {}
+    try:
+        rdv: Deuldou = Deuldou.get_for_user(rdv_id=rdv_id, user=request.user)
+    except ObjectDoesNotExist:
+        return HttpResponse(ERREUR)
+    except PermissionDenied:
+        return HttpResponse(PERMISSION)
+    form = ParticipantForm(request.POST or None)
     if request.method == "POST":
-        form = ParticipantForm(request.POST)
-        context = {}
         if form.is_valid():
+            #form = ParticipantForm(request.POST)
+            #context = {}
+            #if form.is_valid():
             print("form is valid")
-            """ Vérif de sécu :
-            Le formulaire envoyé doit correspondre au même Rdv appelé
-            """
-            '''
-            if form.cleaned_data["rdv"] != deuldou:
-                raise PermissionDenied
-            if deuldou.created_by != request.user:
-                return HttpResponse(PERMISSION)
-            '''
             form.save()
             context['success'] = {'Participant ajouté !'}
             response = render(request, 'layout/partials/infos.html', context)
             response['HX-Trigger'] = 'participantAdded_' + str(rdv_id)
             return response
-        context['errors'] = {"Le participant n'a pas pu être ajouté"}
-        return render(request, 'layout/partials/infos.html', context)
-    
-    deuldou: Deuldou = Deuldou.objects.get(pk=rdv_id)
+        else :
+            print("form is NOT valid")
+            print(form)
+            context['errors'] = {"Le participant n'a pas pu être ajouté !"}
+            return render(request, 'layout/partials/infos.html', context)
+    #deuldou: Deuldou = Deuldou.objects.get(pk=rdv_id)
     # Il faut instancier avant le formulaire pour récupérer la value du rdv pour le formulaire (dans la vue)
-    form = ParticipantForm(instance=Participant(rdv=deuldou))
+    form = ParticipantForm(instance=Participant(rdv=rdv))
     context = {"form": form, "rdv_id": rdv_id}
     return render(request, 'users/1_gestion_rdv/partials/modalParticipant.html', context=context)
 

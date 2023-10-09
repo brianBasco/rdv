@@ -76,7 +76,7 @@ class Participant(models.Model):
 
     def __str__(self):
         return self.nom
-
+    
     """
     Contrainte unique sur les clés RDV et EMAIL    
     """
@@ -88,12 +88,9 @@ class Participant(models.Model):
     
     @classmethod
     def get_for_user(cls, participant_id:int, user:User):
-        try:
-            participant: Participant = cls.objects.get(pk=participant_id)
-        except Exception:
-            return ObjectDoesNotExist()
+        participant: Participant = cls.objects.get(pk=participant_id)
         if participant.email != user.email:
-            return PermissionDenied()
+            raise PermissionDenied()
         return participant
 
 
