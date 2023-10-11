@@ -69,6 +69,15 @@ class ParticipantForm(forms.ModelForm):
         model = Participant
         fields = ["rdv", "email", "nom"]
         widgets = {'rdv': forms.HiddenInput()}
+    
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        rdv = self.cleaned_data["rdv"]
+        if Participant.objects.filter(email=email, rdv=rdv).exists():
+            raise ValidationError("{} est déjà enregistré pour ce Rendez-vous".format(email))
+        # Always return a value to use as the new cleaned data, even if
+        # this method didn't change it.
+        return email
 
 class HTMXParticipantForm(forms.ModelForm):
     class Meta:

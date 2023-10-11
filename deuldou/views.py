@@ -248,12 +248,6 @@ def htmx_updateParticipant(request: HttpRequest, id_participant: int):
             return render(request, TEMPLATE_INFOS, context= context)
     
     return render(request, "users/0_main/partials/participantForm.html", {'form': form, 'id_participant': id_participant})
-    # retourner le formulaire s'il n'y a pas d'erreurs, sinon la liste des erreurs :
-    #if len(errors) == 0:
-    #    return render(request, "users/0_main/partials/participantForm.html", {'form': form, 'id_participant': id_participant})
-    #else:
-    #    context['errors'] = errors
-    #    return render(request, TEMPLATE_INFOS, context= context)
 
 
 @login_required
@@ -455,7 +449,7 @@ def x_addParticipant(request: HttpRequest, rdv_id: int):
     """
     Sécurité : à tester
     Ajoute un participant à un RDV créé par le USER
-    NON FONCTIONNEL
+    FONCTIONNEL
     """
     context = {}
     try:
@@ -464,26 +458,19 @@ def x_addParticipant(request: HttpRequest, rdv_id: int):
         return HttpResponse(ERREUR)
     except PermissionDenied:
         return HttpResponse(PERMISSION)
-    form = ParticipantForm(request.POST or None)
+    form = ParticipantForm(initial={'rdv': rdv_id})
     if request.method == "POST":
+        form = ParticipantForm(request.POST)
         if form.is_valid():
-            #form = ParticipantForm(request.POST)
-            #context = {}
-            #if form.is_valid():
             print("form is valid")
             form.save()
-            context['success'] = {'Participant ajouté !'}
-            response = render(request, 'layout/partials/infos.html', context)
+            response = render(request, 'users/1_gestion_rdv/partials/formInfos.html', {'message' : 'Participant ajouté !'})
             response['HX-Trigger'] = 'participantAdded_' + str(rdv_id)
             return response
         else :
             print("form is NOT valid")
-            print(form)
-            context['errors'] = {"Le participant n'a pas pu être ajouté !"}
-            return render(request, 'layout/partials/infos.html', context)
-    #deuldou: Deuldou = Deuldou.objects.get(pk=rdv_id)
-    # Il faut instancier avant le formulaire pour récupérer la value du rdv pour le formulaire (dans la vue)
-    form = ParticipantForm(instance=Participant(rdv=rdv))
+            context = {"form": form, "rdv_id": rdv_id}
+            return render(request, 'users/1_gestion_rdv/partials/ParticipantForm.html', context=context)
     context = {"form": form, "rdv_id": rdv_id}
     return render(request, 'users/1_gestion_rdv/partials/modalParticipant.html', context=context)
 
