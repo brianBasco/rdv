@@ -20,8 +20,7 @@ from ics import Calendar as Cal
 from ics import Event as Ev
 from pwgen import pwgen
 
-from .forms import (Add_Participant_Form, ContactForm, HTMXParticipantForm,
-                    Liste_contactsForm, ParticipantForm, RdvForm)
+from .forms import ContactForm, Liste_contactsForm, ParticipantForm, RdvForm
 from .models import Contact, Deuldou, Liste_contacts, Participant, Tag, User
 
 # ------------------- Paramètres de config -----------------------
@@ -192,10 +191,12 @@ def x_addRdv(request: HttpRequest):
     user: User = request.user
     form: RdvForm = RdvForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        deuldou: Deuldou = form.save(commit=False)
-        deuldou.created_by = request.user
-        deuldou.save()
-        participation: Participant = Participant(email=user.email, rdv=deuldou, nom=user.first_name)
+        #deuldou: Deuldou = form.save(commit=False)
+        #deuldou.created_by = request.user
+        #deuldou.save()
+        form.instance.created_by = request.user
+        rdv:Deuldou = form.save()
+        participation: Participant = Participant(email=user.email, rdv=rdv, nom=user.first_name)
         if request.POST.get('createur_participe'):
             participation.statut=Participant.PRESENT
         else:
@@ -217,7 +218,7 @@ def htmx_updateParticipant(request: HttpRequest, id_participant: int):
     errors = set()
     try:
         #participant = Participant.objects.get(pk=id_participant)
-        participant = Participant.get_for_user(id_participant,request.user)
+        participant: Participant = Participant.get_for_user(id_participant,request.user)
     except ObjectDoesNotExist :
         errors.add(ERREUR)
         context['errors'] = errors
@@ -277,11 +278,10 @@ def htmx_getParticipants(request: HttpRequest, id_rdv: int):
 
 # ------------------- Fin des vues de la page principale  ---------------------
         
-# ------------------- Vues de gestion des CONTACTS  ---------------------
+# ------------------- Vues de la page 2 - Gestion des CONTACTS  ---------------------
 
 @login_required
 def contacts_view(request: HttpRequest):
-    #contacts = ContactService.get_Contacts(request.user)
     user:User = request.user
     contacts: list[Contact] = user.contacts.all()
     return render(request, "users/2_contacts/index.html", {'contacts': contacts})
@@ -307,29 +307,20 @@ def add_liste_contact_view(request: HttpRequest):
 @login_required
 def htmx_addContact(request: HttpRequest):
     """
-    Ajoute le contact au User (User basé sur la session) et retourne le signal pour MAJ Htmx
+    Sécurité : à tester
+    Ajoute un Contact à un User
+    NON FONCTIONNEL
     """
-    user: User = request.user
-    if request.method == "GET":
-        #form: ContactForm = ContactForm(initial={'user': user})
-        form: ContactForm = ContactForm()
-        return render(request, "users/2_contacts/partials/contactForm.html", {'form': form})
     if request.method == "POST":
-        contact: Contact = Contact(user=request.user)
-        form: ContactForm = ContactForm(request.POST, instance=contact)
+        form: ContactForm = ContactForm(request.POST)
         if form.is_valid():
             form.save()
-            #messages.add_message(request, messages.SUCCESS, "Le contact a été ajouté")
-
-        else:
-            pass
-            #print(form.errors)
-            # A faire : récupérer les erreurs du formulaire
-            #messages.add_message(request, messages.ERROR, "vous ne pouvez pas enregistrer cet utilisateur !")
-        #return redirect('contacts')
-        response = HttpResponse()
-        response.headers["HX-Trigger"] = "addContact"
-        return response
+            response = HttpResponse("Contact ajouté")
+            response.headers["HX-Trigger"] = "addContact"
+            return response
+    else:
+        form: ContactForm = ContactForm(initial={'user': request.user})
+    return render(request, "users/2_contacts/partials/contactForm.html", {'form': form})
 
 
 

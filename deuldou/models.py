@@ -116,7 +116,6 @@ class Contact(models.Model):
         Un User ne peut pas être Contact de lui même :
         """
         if self.user.email == self.email :
-            #raise ValidationError("Vous ne pouvez pas vous ajouter")
             raise ValidationError({"email": "Vous ne pouvez pas vous ajouter comme Contact"})
         
     """

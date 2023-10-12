@@ -43,10 +43,6 @@
     <div class="btn-group">
         <a class="btn btn-outline-secondary" href="{% url 'add_liste_contact' %}">Ajouter Liste +</a>
         
-        <!-- Button trigger modal
-        {% comment "ce bouton permet d'appeler le Modal et d'afficher soit Contact Empty ou existant" %}
-        {% endcomment %}
-        -->
         <button hx-get="{% url 'htmx_addContact' %}"
         hx-trigger="click"
         hx-target="#ModalAddContactContent"
