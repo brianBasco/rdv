@@ -3,69 +3,40 @@
 
 {% block content %}
 
-<!-- Modal 
-<div class="modal fade" id="ModalUpdateParticipation" tabindex="-1" aria-labelledby="ModalUpdateParticipation" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="ModalUpdateParticipationLabel">Modifier</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="ModalUpdateParticipationBody">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
-      </div>
-    </div>
-  </div>
--->
-
-
-{# Modal générique - par exemple pour ajouter un Rdv, template : partials modal  #}
-
-{% include 'layout/partials/modal.html' %}
 
 <!-- Modal de participation -->
-<div class="modal fade" id="ModalUpdateParticipation" tabindex="-1" aria-labelledby="ModalUpdateParticipation" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content" id="ModalUpdateParticipationContent">
+<div class="modal fade" id="ModalUpdateParticipation" tabindex="-1" aria-labelledby="ModalUpdateParticipation"
+  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="ModalUpdateParticipationContent">
       ...
-      </div>
     </div>
   </div>
-  <!-- Fin du Modal -->
+</div>
+<!-- Fin du Modal -->
 
 
 <div class="container">
 
-        <div class="container py-4">
-            <h1>Votre liste de Rdv!</h1>
-        </div>
-    
-           
-            <!-- Button trigger modal -->
-            <div class="mb-3 d-flex justify-content-end">
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal"
-                hx-get="{% url 'x_addRdv' %}"
-                hx-swap="innerHTML"
-                hx-target="#modalContent">
-                    <b>+ </b>Ajouter un rendez-vous
-                  </button>
-            </div>
+  <div class="container py-4">
+    <h1 class="titre">Votre liste de Rdv!</h1>
+  </div>
 
-           
-    <div id="liste_rdvs"
-        hx-get="{% url 'x_getRdvs' %}"
-        hx-trigger="load, updateRDV from:body"
-        hx-swap="innerHTML"
-    >
 
-    {# Liste des Rdvs à charger avec Xthml, template : partial liste_rdvs  #}
-   
-    </div>
+  <!-- Button trigger modal -->
+  <div class="mb-3 d-flex justify-content-end">
+    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalStatic"
+      hx-get="{% url 'x_addRdv' %}" hx-target="#modalStatic">
+      <b>+ </b>Ajouter un rendez-vous
+    </button>
+  </div>
+
+
+  <div id="liste_rdvs" hx-get="{% url 'x_getRdvs' %}" hx-trigger="load, updateRDV from:body" hx-swap="innerHTML">
+
+    {# Liste des Rdvs à charger avec Xthml, template : partial liste_rdvs #}
+
+  </div>
 </div>
 
 {% endblock content %}

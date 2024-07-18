@@ -2,48 +2,60 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {% block title %}
+  {% block title %}
 
-    {% endblock title %}
-    
-    {% load static %}
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-5.0.2-dist/css/bootstrap.min.css' %}" />
-    <!-- Style CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'style-dist/style.css' %}" />
+  {% endblock title %}
+
+  {% load static %}
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-5.0.2-dist/css/bootstrap.min.css' %}" />
+  <!-- Style CSS -->
+  <link rel="stylesheet" type="text/css" href="{% static 'style-dist/style.css' %}" />
 
 </head>
 
 <body>
 
-    {% block navigation %}
+  {% block navigation %}
 
-    {% endblock navigation %}
-  
+  {% endblock navigation %}
 
-    {% block content %}
+  {% include 'components/Modal/modalStatic.html' %}
 
-    {% endblock content %}
+  {% block content %}
 
-   <!-- Production version
+  {% endblock content %}
+
+  <!-- Production version
     <script src="https://unpkg.com/@popperjs/core@2"></script>
 -->
-<script type="text/javascript" src="{% static 'bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/check_passwords.js' %}"></script>
-<script src="https://unpkg.com/htmx.org@1.8.4"></script>
-<script>
+  <script type="text/javascript" src="{% static 'bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/check_passwords.js' %}"></script>
+  <script type="text/javascript" src="{% static 'htmx/htmx-1.8.4.js' %}"></script>
+  <!-- <script src="https://unpkg.com/htmx.org@1.8.4"></script> -->
+  <script>
     document.body.addEventListener('htmx:configRequest', (event) => {
       event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
     })
   </script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-    {% block script %}
+  {% block script %}
 
-    {% endblock script %}
+  {% endblock script %}
+  <script>
+    $(document).ready(function () {
+      // Détecter l'événement de fermeture du modal
+      $('#modalStatic').on('hidden.bs.modal', function () {
+        // Vider le contenu du modal
+        $(this).find('#modalFooterButtons').empty();
+        $(this).find('#modalTitle').empty();
+      });
+    });
+  </script>
 
 </body>
 

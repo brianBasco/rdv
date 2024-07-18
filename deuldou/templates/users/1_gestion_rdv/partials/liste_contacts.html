@@ -1,0 +1,47 @@
+<div hx-swap-oob="afterbegin :#modalTitle">
+    Sélectionner des contacts
+</div>
+
+<div class="container" id="selectContacts">
+
+
+    {% if formset %}
+    <form id="contact-form">
+        {{ formset.management_form }}
+        {% for form in formset %}
+
+        {{ form.non_field_errors }}
+        {{ form.email }}
+        {{ form.nom }}
+        <div class="form-check">
+            {{ form.is_checked }}
+
+            <label class="form-check-label" for="flexCheckDefault">
+                <b>{{ form.nom.value }}</b>
+            </label>
+
+
+        </div>
+
+        {% endfor %}
+    </form>
+    {% else %}
+
+    Aucun contact à ajouter
+
+    {% endif %}
+
+    {% for contact in contacts %}
+    <div class="form-check form-switch">
+        <input name="{{ contact.email }}" class="form-check-input" type="checkbox" role="switch">
+        <label class="form-check-label">{{ contact.nom }}</label>
+    </div>
+    {% endfor %}
+
+</div>
+
+<div hx-swap-oob="afterbegin :#modalFooter">
+    <button type="button" class="btn btn-primary" hx-post="{% url 'x_selectContacts' rdv_id %}"
+        hx-include="#contact-form" hx-target="#contact-form">Sauvegarder</button>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+</div>

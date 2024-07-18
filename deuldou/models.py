@@ -92,8 +92,7 @@ class Participant(models.Model):
         if participant.email != user.email:
             raise PermissionDenied()
         return participant
-
-
+    
 
 """ ----------------  CONTACTS ----------------------- """
 
@@ -118,6 +117,13 @@ class Contact(models.Model):
         if self.user.email == self.email :
             raise ValidationError({"email": "Vous ne pouvez pas vous ajouter comme Contact"})
         
+    @classmethod
+    def get_for_user(cls, pk:int, user:User):
+        contact: Contact = cls.objects.get(pk=pk)
+        if contact.user != user:
+            raise PermissionDenied()
+        return contact
+        
     """
     Contrainte unique sur les clés USER et EMAIL    
     """
@@ -128,15 +134,15 @@ class Contact(models.Model):
         ]
 
 
-class Liste_contacts(models.Model):
+class ListeContacts(models.Model):
     """
-    Un User peut enregistrer plusieurs listes \n
-    Un contact peut appartenir à plusieurs listes (exemple, contact(seb) appartient à entrainement et matchs)\n
-    contraintes:\n
+    Un User peut enregistrer plusieurs listes
+    Un contact peut appartenir à plusieurs listes (exemple, contact(seb) appartient à entrainement et matchs)
+    contraintes:
     - unique pour : USER et NOM
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='liste_contacts')
-    nom = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='get_listes_contacts')
+    nom = models.CharField(max_length=100, blank=False, null=False)
     contacts = models.ManyToManyField(Contact)
 
     class Meta:

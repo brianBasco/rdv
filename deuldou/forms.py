@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from .models import Contact, Deuldou, Liste_contacts, Participant
+from .models import Contact, Deuldou, ListeContacts, Participant
 
 
 # Rdv Form V2
@@ -21,6 +21,14 @@ class RdvForm(forms.ModelForm):
 
         if debut is None :
             cleaned_data["heure_debut"] = '00:00'
+
+"""
+class UpdateRdvForm(RdvForm):
+    class Meta:
+        exclude = [""]
+        fields = ['nom','jour','heure_debut','heure_fin','lieu']
+"""
+
     
     
 """
@@ -51,17 +59,19 @@ class ParticipantForm(forms.ModelForm):
         rdv = self.cleaned_data["rdv"]
         if Participant.objects.filter(email=email, rdv=rdv).exists():
             raise ValidationError("{} est déjà enregistré pour ce Rendez-vous".format(email))
-        # Always return a value to use as the new cleaned data, even if
-        # this method didn't change it.
         return email
 
 
 # Formulaire à renommer -> ParticipantUpdate
-class HTMXParticipantForm(forms.ModelForm):
+"""
+class UpdateParticipantForm(forms.ModelForm):
     class Meta:
         model = Participant
         fields = ["nom","statut"]
-        #widgets = {'rdv': forms.HiddenInput()}
+"""
+class UpdateParticipantForm(ParticipantForm):
+    class Meta(ParticipantForm.Meta):
+        fields = ["nom","statut"]
 
 
 class ContactForm(forms.ModelForm):
@@ -72,16 +82,28 @@ class ContactForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data["email"]
-        user = self.cleaned_data["user"]
+        user  = self.cleaned_data["user"]
         if Contact.objects.filter(email=email, user=user).exists():
-            raise ValidationError("{} est déjà enregistré pour ce Rendez-vous".format(email))
+            raise ValidationError("{} est déjà enregistré dans vos contacts".format(email))
         # Always return a value to use as the new cleaned data, even if
         # this method didn't change it.
         return email
 
 
-class Liste_contactsForm(forms.ModelForm):
+
+class ListeContactsForm(forms.ModelForm):
     class Meta:
-        model = Liste_contacts
-        exclude = ["contacts"]
-        widgets = {'user': forms.HiddenInput()}
+        model = ListeContacts
+        fields= ['user','nom','contacts']
+        widgets = {'user': forms.HiddenInput(), 'contacts': forms.CheckboxSelectMultiple(attrs={'required': False}), 'nom': forms.TextInput(attrs={'class': "form-control"})}
+
+
+class SelectContactForm(forms.Form):
+    #class Meta(ContactForm.Meta):
+    #   widgets = {'user': forms.HiddenInput(),'email': forms.HiddenInput()}
+    email = forms.EmailField(widget=forms.HiddenInput())
+    nom = forms.CharField(widget=forms.HiddenInput())#label=""
+    is_checked = forms.BooleanField(required=False, initial=False,label="")
+
+    is_checked.widget.attrs.update({"class": "form-check-input"})
+    #nom.widget.attrs.update({"class": "form-control-plaintext"})

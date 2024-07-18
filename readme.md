@@ -1,41 +1,11 @@
 run server :
 python manage.py runserver
 
-
-Doc django relation manyToMany :
-
-https://docs.djangoproject.com/en/4.1/topics/db/models/#many-to-one-relationships
-
-Le modèle est à refaire...
-exemple de relations manytomany à travers une table intermédiaire :
-
->>> ringo = Person.objects.create(name="Ringo Starr")
->>> paul = Person.objects.create(name="Paul McCartney")
->>> beatles = Group.objects.create(name="The Beatles")
->>> m1 = Membership(person=ringo, group=beatles,
-...     date_joined=date(1962, 8, 16),
-...     invite_reason="Needed a new drummer.")
->>> m1.save()
->>> beatles.members.all()
-<QuerySet [<Person: Ringo Starr>]>
->>> ringo.group_set.all()
-<QuerySet [<Group: The Beatles>]>
->>> m2 = Membership.objects.create(person=paul, group=beatles,
-...     date_joined=date(1960, 8, 1),
-...     invite_reason="Wanted to form a band.")
->>> beatles.members.all()
-<QuerySet [<Person: Ringo Starr>, <Person: Paul McCartney>]>
-
 # Création des utilisateurs avec l'API USER :
 
 >>> from django.contrib.auth.models import User
 >>> user = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
 
-# At this point, user is a User object that has already been saved
-# to the database. You can continue to change its attributes
-# if you want to change other fields.
->>> user.last_name = 'Lennon'
->>> user.save()
 
 # Fonctionnement du modèle : 
 
@@ -102,9 +72,7 @@ pwgen(10, symbols=False)
 >> ujr20YVkH3
 
 # A faire :
-Utilisateur test :
-test2@gmail.com
-Jordan23+
+
 Terminer Gestion utilisateur et mot de passe :
 - checker backend mot de passe + de 8 caractères et NonNumeric entièrement : OK (avec validators de Django)
 - checker backend format Email respecté : A faire
@@ -116,7 +84,7 @@ Terminer Gestion utilisateur et mot de passe :
 
 - Corriger l'ajout du User en PArticipant à un rdv (nom = null pour l'instant) :OK Fait
   
-- Finir le formulaire d'ajout d'un rdv avec les erreurs
+- Finir le formulaire d'ajout d'un rdv avec les erreurs : OK fait
 
 - tests à faire :
   - permission de créer rdv : Fait
@@ -130,7 +98,7 @@ Terminer Gestion utilisateur et mot de passe :
   - Ne pas ajouter un Participant sans rentrer une adresse mail valide : OK fait Fait en modificant le Model (EmailField)
   - Redéfinir en français les erreurs sur les formulaires :
 
-- Implémenter page des contacts
+- Implémenter page des contacts : FAIT (retravailler UI liste de contacts dans le formulaire)
 - Implémenter PWA
 - implémenter SSO (facultatif)
 - Implémenter i18n

@@ -103,10 +103,12 @@ env/
 venv/ 
 ENV/ 
 env.bak/ 
-venv.bak/ 
+venv.bak/
+django-env/ 
 
 # mkdocs documentation 
-/site 
+/site
+secret_infos.md
 
 # mypy 
 .mypy_cache/ 
