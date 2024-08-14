@@ -245,7 +245,7 @@ def x_addRdv(request: HttpRequest):
         else:
             participation.statut = Participant.ABSENT
         participation.save()
-        response: HttpResponse = HttpResponse("Votre rdv a été créé !")
+        response: HttpResponse = HttpResponse('<div class="alert alert-success" role="alert">Votre rdv a été créé !</div>')
         response["HX-Trigger"] = 'updateRDV'
         return response
     return render(request, 'components/Rdv/RdvModal.html', {'form': form})
@@ -260,19 +260,20 @@ def htmx_updateParticipant(request: HttpRequest, id_participant: int):
     try:
         # participant = Participant.objects.get(pk=id_participant)
         participant: Participant = Participant.get_for_user(id_participant, request.user)
-    except ObjectDoesNotExist:
-        return render(request, 'components/Modal/formInfos.html', {'error': ERREUR})
-    except PermissionDenied:
-        return render(request, 'components/Modal/formInfos.html', {'error': PERMISSION})
+        #participant: Participant = Participant.get_for_user(0, request.user)
+    except:
+        return render(request, 'components/Participant/UpdateParticipantModalInfos.html', {'error': ERREUR})
     form = UpdateParticipantForm(instance=participant)
     if request.method == 'POST':
         form = UpdateParticipantForm(request.POST, instance=participant)
         if form.is_valid():
             form.save()
             rdv: int = participant.rdv.id
-            response = render(request, 'components/Modal/formInfos.html', {'success': "Votre participation a été mise à jour"})
+            #response = render(request, 'components/Modal/formInfos.html', {'success': "Votre participation a été mise à jour"})
+            response = render(request, 'components/Participant/UpdateParticipantModalInfos.html', {'success': "Votre participation a été mise à jour"})
             response["HX-Trigger"] = 'updateParticipants_' + str(rdv)
             return response
+    # GET méthode et/ou Formulaire invalide
     return render(request, "components/Participant/UpdateParticipantModal.html", {'form': form, 'id_participant': id_participant})
 
 
@@ -497,10 +498,10 @@ def x_deleteRdv(request: HttpRequest, rdv_id: int):
         else:
             rdv.delete()
             context['success'] = {'Le Rendez-Vous a été supprimé'}
-            response = render(request, TEMPLATE_INFOS, context)
+            response = render(request, 'users/1_gestion_rdv/partials/modalConfirmInfos.html', context)
             response['HX-trigger'] = json.dumps({"rdvDeleted": str(rdv_id)})
             return response
-        return render(request, TEMPLATE_INFOS, context)
+        return render(request, 'users/1_gestion_rdv/partials/modalConfirmInfos.html', context)
 
 
 # Méthode à reprendre
@@ -530,7 +531,7 @@ def x_deleteParticipant(request: HttpRequest, id: int):
     Vérifier que le Participant appartient à un Rdv du User.
     Fonctionnel
     '''
-    if request.method == "DELETE":
+    if request.method == "POST":
         context = {}
         # Sécurité :
         try:
@@ -547,53 +548,61 @@ def x_deleteParticipant(request: HttpRequest, id: int):
                 context['errors'] = {PERMISSION}
             else:
                 participant.delete()
-                context['success'] = {"Le participant a été supprimé"}
-                response = render(
-                    request, 'layout/partials/infos.html', context)
+                context['success'] = {str.format("{} a été supprimé", participant.nom)}
+                # response = render(request, 'layout/partials/infos.html', context)
+                response = render(request, 'users/1_gestion_rdv/partials/modalConfirmInfos.html', context) 
                 response['HX-Trigger'] = 'participantDeleted_' + str(rdv.id)
                 return response
-        return render(request, 'layout/partials/infos.html', context)
+        return render(request, 'users/1_gestion_rdv/partials/modalConfirmInfos.html', context)
 
 
 @login_required
 def x_addParticipant(request: HttpRequest, rdv_id: int):
     """
-    Sécurité : à tester
     Ajoute un participant à un RDV créé par le USER
+    Sécurité : testée
     FONCTIONNEL
+    UI : 22/07/2024 vérifiée - Affichage Ok des erreurs et des succès dans le formulaire
     """
     context = {}
     try:
         rdv: Deuldou = Deuldou.get_for_user(rdv_id=rdv_id, user=request.user)
+        #rdv: Deuldou = Deuldou.get_for_user(rdv_id=rdv_id, user=0)
     except ObjectDoesNotExist:
-        return HttpResponse(ERREUR)
+        return render(request, 'components/Participant/formInfosModal.html', {'error': ERREUR})
     except PermissionDenied:
-        return HttpResponse(PERMISSION)
+        return render(request, 'components/Participant/formInfosModal.html', {'error': PERMISSION})
     form = ParticipantForm(initial={'rdv': rdv_id})
     if request.method == "POST":
         form = ParticipantForm(request.POST)
         if form.is_valid():
-            form.save()
-            response = render(
-                request, 'components/Participant/formInfos.html', {'message': 'Participant ajouté !'})
+            participant: Participant = form.save()
+            context['success'] = str.format('{} ajouté !', participant.nom)
+            context["rdv_id"] = rdv_id
+            response = render(request, 'components/Participant/formInfosModal.html', context)
             response['HX-Trigger'] = 'participantAdded_' + str(rdv_id)
             return response
+        else:
+            # Formulaire invalide : Renvoi du formulaire avec erreurs :
+            return render(request, 'components/Participant/ParticipantModal.html', {"form": form, "rdv_id": rdv_id})
+    # Méthode GET : Formulaire vierge :
     context = {"form": form, "rdv_id": rdv_id}
-    #return render(request, 'users/1_gestion_rdv/partials/modalParticipant.html', context=context)
     return render(request, 'components/Participant/ParticipantModal.html', context=context)
 
 
 @login_required
 def x_selectContacts(request: HttpRequest, rdv_id:int):
     """
-    Retourne la liste des contacts ne participant pas au RDV \n
+    Retourne la liste des contacts sans ceux déjà inscrits au RDV \n
     Ajoute les contacts sélectionnés comme participants
     """
     try:
         rdv:Deuldou = Deuldou.get_for_user(rdv_id=rdv_id, user=request.user)
     except:
         return HttpResponse(ERREUR)
+    # récupérer les emails des participants au Rdv
     emails = [p.email for p in Participant.objects.filter(rdv=rdv_id)]
+    # On enlève les participants pour déjà présents de la liste de contacts
     contacts = request.user.contacts.exclude(email__in=emails)
     ContactsFormSet = formset_factory(SelectContactForm, extra=0)
     formset = ContactsFormSet(initial=[{"nom": c.nom, "email": c.email} for c in contacts])
@@ -607,9 +616,11 @@ def x_selectContacts(request: HttpRequest, rdv_id:int):
                     nom = form.cleaned_data['nom']
                     email = form.cleaned_data['email']
                     Participant.objects.create(rdv=rdv, email=email, nom=nom)
-            response = render(request, 'components/Modal/formInfos.html',{'success':"Les contacts ont été ajoutés au Rendez-vous", 'button':'OK'}) 
+            #response = render(request, 'components/Modal/formInfos.html',{'success':"Les contacts ont été ajoutés au Rendez-vous", 'button':'OK'}) 
+            response = render(request, 'components/Contact/SelectContactsModalInfos.html',{'success':"Les contacts ont été ajoutés au Rendez-vous"}) 
             response['HX-Trigger'] = 'participantAdded_' + str(rdv_id)
             return response
+    # Méthode GET : Retourne le formulaire initial
     context = {}
     context['rdv_id'] = rdv_id
     if len(formset) != 0:

@@ -56,9 +56,8 @@
                 </button>
 
                 <button type="button" class="btn btn-delete-custom" alt="supprimer" aria-label="Supprimer"
-                    hx-delete="{% url 'x_deleteRdv' rdv.id %}"
-                    hx-confirm="Etes-vous sûr de vouloir supprimer ce Rendez-vous ?" hx-target="#feedback"
-                    hx-swap="innerHtml">
+                    data-bs-toggle="modal" data-bs-target="#modalConfirm"
+                    onclick="askModalDeleteRdv('Etes-vous sûr de vouloir supprimer ce Rendez-vous ?', '{{ rdv.id }}')">
 
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                         class="bi bi-trash" viewBox="0 0 16 16">

@@ -6,10 +6,8 @@
     </div>
     <div class="col text-end">
       <button id="btn_del_{{ participant.id }}" type="button" class="btn btn-sm btn-delete2-custom" alt="supprimer"
-        aria-label="Supprimer" data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer"
-        hx-delete="{% url 'x_deleteParticipant' participant.id %}"
-        hx-confirm="Etes-vous sûr de vouloir supprimer {{ participant.nom }} ?" hx-target="#feedback"
-        hx-swap="innerHtml">
+        aria-label="Supprimer" data-bs-toggle="modal" data-bs-target="#modalConfirm"
+        onclick="modalAskDelete('Supprimer {{ participant.nom }} ?', '{{ participant.id }}')">
         <b>X</b>
       </button>
     </div>

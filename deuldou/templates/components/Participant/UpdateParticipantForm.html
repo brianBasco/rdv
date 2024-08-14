@@ -1,4 +1,4 @@
-<form hx-post="{% url 'htmx_updateParticipant' id_participant  %}">
+<form hx-post="{% url 'htmx_updateParticipant' id_participant  %}" hx-target="#modalStatic">
     {% csrf_token %}
     {% load widget_tweaks %}
 

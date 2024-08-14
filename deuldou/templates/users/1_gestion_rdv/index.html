@@ -2,6 +2,7 @@
 
 {% block content %}
 
+{% include 'components/Modal/modalConfirm.html' %}
 
 <div class="container">
 
@@ -29,6 +30,7 @@
 
     {% comment %}
     Récupère la liste des Rdvs avec les triggers
+    Insertion des participants par appel à Htmx -> template : liste_rdvs.html
     {% endcomment %}
   </div>
 
@@ -50,6 +52,19 @@
   });
 
 
+  $(document).ready(function () {
+    // Détecter l'événement de fermeture du modal
+    $('#modalConfirm').on('hidden.bs.modal', function () {
+      // Vider le contenu du modal
+      $(this).find('#modalConfirmFooterButtons').empty();
+    });
+    $('#modalConfirm').on('shown.bs.modal', function () {
+      // Ajouter le titre
+      $(this).find('#modalConfirmTitle').html("Confirmation");
+    });
+  });
+
+
   //function sendContacts(div) {
   let sendContacts = (div) => {
     console.log("hello !!")
@@ -58,6 +73,33 @@
   }
 
 
+  let modalAskDelete = (message, participant_id) => {
+    const urlPattern = "{% url 'x_deleteParticipant' 0 %}"; // Génère l'URL partielle
+    const finalUrl = urlPattern.replace('0', participant_id);
+    const buttonConfirm = `<button type="button" class="btn btn-outline-danger" hx-target="#modalConfirm" hx-post="${finalUrl}">Suppression</button>`;
+    const buttonCancel = '<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>'
+    $("#modalConfirmBody").html(message);
+    $("#modalConfirmFooterButtons").append(buttonCancel);
+    $("#modalConfirmFooterButtons").append(buttonConfirm);
+    // Sélectionner le conteneur où le bouton sera ajouté
+    const container = document.getElementById('modalConfirm');
+    // Réinitialiser HTMX pour prendre en compte les nouveaux éléments
+    htmx.process(container);
+  }
+
+  let askModalDeleteRdv = (message, rdv_id) => {
+    const urlPattern = "{% url 'x_deleteRdv' 0 %}"; // Génère l'URL partielle
+    const finalUrl = urlPattern.replace('0', rdv_id);
+    const buttonConfirm = `<button type="button" class="btn btn-outline-danger" hx-target="#modalConfirm" hx-delete="${finalUrl}">Suppression</button>`;
+    const buttonCancel = '<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>'
+    $("#modalConfirmBody").html(message);
+    $("#modalConfirmFooterButtons").append(buttonCancel);
+    $("#modalConfirmFooterButtons").append(buttonConfirm);
+    // Sélectionner le conteneur où le bouton sera ajouté
+    const container = document.getElementById('modalConfirm');
+    // Réinitialiser HTMX pour prendre en compte les nouveaux éléments
+    htmx.process(container);
+  }
 
 </script>
 

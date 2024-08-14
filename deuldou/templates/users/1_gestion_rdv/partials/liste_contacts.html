@@ -18,6 +18,7 @@
 
             <label class="form-check-label" for="flexCheckDefault">
                 <b>{{ form.nom.value }}</b>
+                ({{ form.email.value }})
             </label>
 
 
@@ -41,7 +42,9 @@
 </div>
 
 <div hx-swap-oob="afterbegin :#modalFooter">
-    <button type="button" class="btn btn-primary" hx-post="{% url 'x_selectContacts' rdv_id %}"
-        hx-include="#contact-form" hx-target="#contact-form">Sauvegarder</button>
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+    <button type="button" class="btn btn-default" hx-get="{% url 'x_addParticipant' rdv_id %}"
+        hx-target="#modalStatic"><- </button>
+            <button type="button" class="btn btn-primary" hx-post="{% url 'x_selectContacts' rdv_id %}"
+                hx-include="#contact-form" hx-target="#modalStatic">Sauvegarder</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
 </div>
