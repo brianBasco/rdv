@@ -105,5 +105,5 @@ class SelectContactForm(forms.Form):
     nom = forms.CharField(widget=forms.HiddenInput())#label=""
     is_checked = forms.BooleanField(required=False, initial=False,label="")
 
-    is_checked.widget.attrs.update({"class": "form-check-input"})
+    is_checked.widget.attrs.update({"class": "form-check-input form-check-input-perso"})
     #nom.widget.attrs.update({"class": "form-control-plaintext"})

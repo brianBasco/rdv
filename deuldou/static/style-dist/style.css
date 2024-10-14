@@ -1,5 +1,6 @@
 body {
 	background-color: #002b44;
+	color: white;
 }
 
 .card-body-custom {
@@ -84,4 +85,9 @@ body {
 	font-size: 1.2rem;
 	line-height: 2rem;
 	font-weight: 500;
+}
+
+.form-check-input-perso {
+	border: 2px solid rgba(0, 0, 0);
+	border-radius: 0px;
 }

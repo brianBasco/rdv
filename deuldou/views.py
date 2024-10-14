@@ -617,7 +617,7 @@ def x_selectContacts(request: HttpRequest, rdv_id:int):
                     email = form.cleaned_data['email']
                     Participant.objects.create(rdv=rdv, email=email, nom=nom)
             #response = render(request, 'components/Modal/formInfos.html',{'success':"Les contacts ont été ajoutés au Rendez-vous", 'button':'OK'}) 
-            response = render(request, 'components/Contact/SelectContactsModalInfos.html',{'success':"Les contacts ont été ajoutés au Rendez-vous"}) 
+            response = render(request, '{}/partials/retour_infos.html'.format(GESTION_RDV),{'success':"Les contacts ont été ajoutés au Rendez-vous"}) 
             response['HX-Trigger'] = 'participantAdded_' + str(rdv_id)
             return response
     # Méthode GET : Retourne le formulaire initial
@@ -626,6 +626,7 @@ def x_selectContacts(request: HttpRequest, rdv_id:int):
     if len(formset) != 0:
         context['formset'] = formset
     return render(request, '{}/partials/liste_contacts.html'.format(GESTION_RDV), context=context)
+
 
 
 # ------------------- Fin des Vues de gestion des RDV  ---------------------
