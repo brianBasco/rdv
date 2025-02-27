@@ -1,9 +1,20 @@
-{% extends "layout/users.html" %}
+{% extends "layout/base2.html" %}
 
+{% comment %}
+{% extends "layout/users.html" %}
+{% endcomment %}
+
+
+{% block title %}
+<title>Rdv</title>
+{% endblock title %}
 
 {% block content %}
 
+<!-- Modal static -->
+{% include 'components/Modal/modalStatic.html' %}
 
+{% comment %}
 <!-- Modal de participation -->
 <div class="modal fade" id="ModalUpdateParticipation" tabindex="-1" aria-labelledby="ModalUpdateParticipation"
   aria-hidden="true">
@@ -14,7 +25,7 @@
   </div>
 </div>
 <!-- Fin du Modal -->
-
+{% endcomment %}
 
 <div class="container">
 

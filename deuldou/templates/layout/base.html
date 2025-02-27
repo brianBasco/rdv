@@ -24,7 +24,9 @@
 
   {% endblock navigation %}
 
+  {% comment %}
   {% include 'components/Modal/modalStatic.html' %}
+  {% endcomment %}
 
   {% block content %}
 
@@ -34,9 +36,7 @@
     <script src="https://unpkg.com/@popperjs/core@2"></script>
 -->
   <script type="text/javascript" src="{% static 'bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'js/check_passwords.js' %}"></script>
   <script type="text/javascript" src="{% static 'htmx/htmx-1.8.4.js' %}"></script>
-  <!-- <script src="https://unpkg.com/htmx.org@1.8.4"></script> -->
   <script>
     document.body.addEventListener('htmx:configRequest', (event) => {
       event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';

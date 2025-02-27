@@ -115,3 +115,15 @@ path('admin/', admin.site.urls)
 Forms :
 tweaking des inputs : django-widget-tweaks
 https://pypi.org/project/django-widget-tweaks/
+
+## App Contacts
+
+Ajout d'une app Contacts sur le projet, permettant d'ajouter les contacts depuis l'api de Google People
+
+Connexion à l'api grâce à Google Cloud et le projet rdvs, ajout du fichier avec les credentials à la racine de ce projet. (contacts_client_secret.json)
+Ajout des codes dans les Settings du projet Django
+
+## A faire :
+
+App registration : fonctionnel (27/02/2025)
+Télécharger Calendrier par Rdv 

@@ -7,11 +7,13 @@ urlpatterns = [
     # path('', views.connexion, name="connexion"),
     path('', views.home, name="home"),
 
-    path('login', views.login_view, name="login"),
-    path('registration', views.registration, name="registration"),
-    path('modifier_password', views.modifier_password, name="modifier_password"),
-    path('logout', views.logout_view, name="logout"),
-
+    
+    # path('login', views.login_view, name="login"),
+    # path('registration', views.registration, name="registration"),
+    # path('modifier_password', views.modifier_password, name="modifier_password"),
+    # path('logout', views.logout_view, name="logout"),
+    
+    
     path('contacts', views.contacts_view, name="contacts"),
     # path('add_contact', views.add_contact_view, name="add_contact"),
     #path('add_liste_contact', views.add_liste_contact_view,name="add_liste_contact"),
@@ -66,14 +68,7 @@ urlpatterns = [
     # Vue des components
     path('rdv_template', views.rdv_template, name="rdv_template"),
 
-    path("password_reset/", auth_views.PasswordResetView.as_view(
-        template_name='registration/password_reset.html'), name="password_reset"),
-    path("password_reset_done/", auth_views.PasswordResetDoneView.as_view(
-        template_name='registration/password_reset_done.html'), name="password_reset_done"),
-    path("password_reset_confirm/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
-        template_name='registration/password_reset_confirm.html'), name="password_reset_confirm"),
-    path("password_reset_complete/", auth_views.PasswordResetCompleteView.as_view(
-        template_name='registration/password_reset_complete.html'), name="password_reset_complete"),
+    
 
 ]
 

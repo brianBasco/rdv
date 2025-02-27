@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import sys
+import os
 
 from pathlib import Path
 
@@ -23,6 +25,11 @@ environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Ajouter le dossier 'apps' au PYTHONPATH
+sys.path.insert(0, str(BASE_DIR / 'apps'))
+# Ajoute le dossier 'apps' au PYTHONPATH
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -43,6 +50,9 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'widget_tweaks',
     'deuldou.apps.DeuldouConfig',
+    'contacts.apps.ContactsConfig',
+    #'apps.registration',
+    'apps.registration.apps.RegistrationConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -134,7 +144,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = 'login'
+#LOGIN_URL = 'login'
+LOGIN_URL = 'registration/login'
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',
@@ -156,3 +167,5 @@ EMAIL_USE_SSL = True
 EMAIL_HOST_USER = 
 EMAIL_HOST_PASSWORD = 
 """
+
+# Configuration OAuth2 pour Google API

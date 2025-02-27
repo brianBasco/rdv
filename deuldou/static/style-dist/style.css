@@ -3,6 +3,10 @@ body {
 	color: white;
 }
 
+.modal {
+	color: black;
+}
+
 .card-body-custom {
 	background-color: black;
 	color: white;
